@@ -92,7 +92,7 @@ vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
         legalMoves.push_back(vector<int>{});
 
         //if no piece at this position then skip
-        if(board[i] == 0)
+        if(board[i] == 0 || abs(board[i]) == 9)
             continue;
         
         //we're only interested in the pieces having the colour of the one playing this turn
@@ -187,8 +187,8 @@ vector<int> ChessBoard::genMoves(int start_pos, int friendly, int enemy){
             for(int dir = 0; dir < edges[start_pos][direction] && move_limit > 0; dir++){
                 
                 //if current position is empty, add it to movelist vector and increase the position by the offset
-
-                if(board[pos] == 0){
+                //9 and -9 are en passant squares. They do not have an actual piece on them
+                if(board[pos] == 0 || abs(board[pos]) == 9){
                     
                     if((!movelist.empty() and find(movelist.begin(), movelist.end(), pos) == movelist.end()) or movelist.empty())
                         movelist.push_back(pos);
@@ -198,7 +198,7 @@ vector<int> ChessBoard::genMoves(int start_pos, int friendly, int enemy){
 
                 //if piece is not a pawn and the square has an enemy piece in the direction the piece is moving, capture it
                 //pawns capture diagonally so must check for them here
-                else if(not pawn and((friendly == 1 and board[pos] < 0) or (friendly == -1 and board[pos] > 0))){
+                else if(not pawn and ((friendly == 1 and board[pos] < 0) or (friendly == -1 and board[pos] > 0))){
                     movelist.push_back(pos);
                     break;
                 }
@@ -213,19 +213,18 @@ vector<int> ChessBoard::genMoves(int start_pos, int friendly, int enemy){
             //en passant not yet done
             if(pawn){
                 if(friendly == 1){
-                    if(edges[start_pos][4] and board[start_pos + 9] < 0)
-                        movelist.push_back(start_pos + 9);
-                    if(edges[start_pos][7] and board[start_pos + 7] < 0)
-                        movelist.push_back(start_pos + 7);
+                    if(edges[start_pos][5] and board[start_pos - 7] < 0)
+                        movelist.push_back(start_pos - 7);
+                    if(edges[start_pos][6] and board[start_pos - 9] < 0)
+                        movelist.push_back(start_pos - 9);
                     
                 }
             
-
                 else{
-                    if(edges[start_pos][5] and board[start_pos - 7] > 0)
-                        movelist.push_back(start_pos - 7);
-                    if(edges[start_pos][6] and board[start_pos - 9] > 0)
-                        movelist.push_back(start_pos - 9);
+                    if(edges[start_pos][4] and board[start_pos + 9] > 0)
+                        movelist.push_back(start_pos + 9);
+                    if(edges[start_pos][7] and board[start_pos + 7] > 0)
+                        movelist.push_back(start_pos + 7);
                 }
             }
         }
@@ -340,12 +339,16 @@ int main(){
         
         if(i == 26)
             board[i] = -2;
-        if(i == 36)
+        if(i == 36 or i == 27 or i == 24 or i == 31)
             board[i] = 2;
         if(i == 45)
             board[i] = 4;
         if(i == 51)
             board[i] = 0;
+        if(i == 18)
+            board[i] = -9;
+        if(i == 23)
+            board[i] = 6;
 
         if(i % 8 == 0)
             cout<<endl;
