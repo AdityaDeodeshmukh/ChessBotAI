@@ -45,7 +45,172 @@ class ChessBoard{
 
         vector<int> checkCastle(int start_pos, vector<int> &movelist, int friendly, int enemy);
 
+        int isCheck(int friendly)
+
 };
+int ChessBoard::IsCheck(int friendly)
+{
+
+    int kingpos;
+    int check = 0;
+    if (friendly == 1)
+    {
+        kingpos = wking_pos;
+    }
+    else if (friendly == -1)
+    {
+        kingpos = bking_pos;
+    }
+    int i = 0, j = 0;
+    int newpos = kingpos;
+    //rook and queen check
+    for (i = 0; i < 4; i++)
+    {
+        newpos = kingpos;
+
+        for (j = 1; j <= edges[kingpos][i]; j++)
+        {
+
+            switch (i)
+            {
+            case 0:
+                newpos = newpos + 8;
+
+                break;
+            case 1:
+                newpos = newpos + 1;
+                break;
+            case 2:
+                newpos = newpos - 8;
+                break;
+            case 3:
+                newpos = newpos - 1;
+                break;
+
+            }
+            if (board[newpos] * friendly > 0)
+            {
+                break;
+            }
+            if (board[newpos] == -4 * friendly || board[newpos] == -2 * friendly || board[newpos] == -3 * friendly || board[newpos] == -1 * friendly)
+            {
+                break;
+            }
+            if (board[newpos] == -friendly * 6 || board[newpos] == -friendly * 7 || board[newpos] == -friendly * 5)
+            {
+                check++;
+                break;
+            }
+
+        }
+    }
+    bool pawncheck = false;
+    //bishop, queen and pawn check
+    for (i = 4; i < 8; i++)
+    {
+        newpos = kingpos;
+        for (j = 1; j <= edges[kingpos][i]; j++)
+        {
+            pawncheck = false;
+            switch (i)
+            {
+            case 4:
+                newpos = newpos + 8 + 1;
+                if (friendly == -1 && j == 1)
+                {
+                    pawncheck = true;
+                }
+                break;
+            case 5:
+                newpos = newpos + 1 - 8;
+                if (friendly == 1 && j == 1)
+                {
+                    pawncheck = true;
+                }
+                break;
+            case 6:
+                newpos = newpos - 8 - 1;
+                if (friendly == 1 && j == 1)
+                {
+                    pawncheck = true;
+                }
+                break;
+            case 7:
+                newpos = newpos - 1 + 8;
+                if (friendly == -1 && j == 1)
+                {
+                    pawncheck = true;
+                }
+                break;
+
+            }
+            if (board[newpos] * friendly > 0)
+            {
+                break;
+            }
+            if (board[newpos] == -friendly * 6 || board[newpos] == -friendly * 7)
+            {
+                break;
+            }
+            if (board[newpos] == -friendly * 5 || board[newpos] == -friendly * 3)
+            {
+                check++;
+                break;
+            }
+            if (pawncheck)
+            {
+                if (board[newpos] == -friendly * 2)
+                {
+                    check++;
+                    break;
+                }
+            }
+            if (!pawncheck)
+            {
+                if (board[newpos] == -friendly * 2)
+                {
+                    break;
+                }
+            }
+
+        }
+    }
+    //knight check
+    int dirnY[4] = { -2,-1,1,2 };
+    int dirnX[2];
+
+    for (i = 0; i < 4; i++)
+    {
+        int newpos = kingpos + dirnY[i] * 8;
+        if (newpos >= 64 || newpos < 0)
+            continue;
+        int row1 = newpos / 8;
+        if (abs(dirnY[i]) == 2)
+        {
+            dirnX[0] = -1;
+            dirnX[1] = 1;
+        }
+        if (abs(dirnY[i]) == 1)
+        {
+            dirnX[0] = -2;
+            dirnX[1] = 2;
+        }
+        for (j = 0; j < 2; j++)
+        {
+            int npos = newpos + dirnX[j];
+            int row2 = npos / 8;
+            if (row1 != row2)
+                continue;
+            if (board[npos] == -friendly * 4)
+            {
+                check++;
+
+            }
+        }
+
+    }
+    return check;
+}
 
 //gets the distance of eacj square from edges in all 8 direcions and stores it in edges vector
 void ChessBoard::getEdgeDistance(){
