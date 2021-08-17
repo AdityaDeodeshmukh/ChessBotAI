@@ -45,7 +45,7 @@ class ChessBoard{
 
         vector<int> checkCastle(int start_pos, vector<int> &movelist, int friendly, int enemy);
 
-        int IsCheck(int friendly)
+        int IsCheck(int friendly);
 
 };
 int ChessBoard::IsCheck(int friendly)
