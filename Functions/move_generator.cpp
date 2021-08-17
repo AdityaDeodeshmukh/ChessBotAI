@@ -21,7 +21,7 @@ class ChessBoard{
         vector<vector<int>> edges;
 
         const vector<int> direction_offsets = {8, 1, -8, -1, 9, -7, -9, 7};
-
+        int En_pessant_pos;
 
         int bking_pos;
 
@@ -29,11 +29,14 @@ class ChessBoard{
             
         ChessBoard(vector<int> board){
             this->board = board;
+            En_pessant_pos=64;
             for(int pos = 0; pos < board.size(); pos++){
                 if(board[pos] == 1)
                     wking_pos = pos;
                 else if(board[pos] == -1)
                     bking_pos = pos;
+                if(abs(board[pos]) == 9)
+                    En_pessant_pos=pos;
             }
         }
         
@@ -46,8 +49,76 @@ class ChessBoard{
         vector<int> checkCastle(int start_pos, vector<int> &movelist, int friendly, int enemy);
 
         int IsCheck(int friendly);
+        void ChangeBoard(int start,int end);
 
 };
+void ChessBoard::ChangeBoard(int start,int end)
+{
+    int friendly=0;
+    if(board[start]>0)
+        friendly=1;
+    if(board[start]<0)
+        friendly=-1;
+    if(friendly==0)
+        return;
+    if(En_pessant_pos!=64)
+    {
+        if(abs(board[start])==2&&abs(board[end])==9)
+        {
+            board[start]=0;
+            board[end]=2*friendly;
+            board[end+8*friendly]=0;
+            En_pessant_pos=64;
+            return;
+        }
+    }
+    En_pessant_pos=64;
+    if(abs(board[start])==2&&abs(end-start)==16)
+    {
+        board[start]=0;
+        board[end]=2*friendly;
+        board[(end+start)/2]=9*(-friendly);
+        return;
+    }
+    if(abs(board[start])==1&&abs(end-start)==2)
+    {
+        if(board[start]==1 && (end-start)>0)
+        {
+            board[start]=0;
+            board[end]=1;
+            board[63]=0;
+            board[(start+end)/2]=6;
+            return;
+        }
+        if(board[start]==1 && (end-start)<0)
+        {
+            board[start]=0;
+            board[end]=1;
+            board[56]=0;
+            board[(start+end)/2]=6;
+            return;
+        }
+        if(board[start]==-1 && (end-start)>0)
+        {
+            board[start]=0;
+            board[end]=1;
+            board[7]=0;
+            board[(start+end)/2]=-6;
+            return;
+        }
+        if(board[start]==-1 && (end-start)<0)
+        {
+            board[start]=0;
+            board[end]=1;
+            board[0]=0;
+            board[(start+end)/2]=-6;
+            return;
+        }
+    }
+    board[end]=board[start];
+    board[start]=0;
+    return;
+}
 int ChessBoard::IsCheck(int friendly)
 {
 
