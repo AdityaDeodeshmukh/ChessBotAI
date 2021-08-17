@@ -45,7 +45,7 @@ class ChessBoard{
 
         vector<int> checkCastle(int start_pos, vector<int> &movelist, int friendly, int enemy);
 
-        int isCheck(int friendly)
+        int IsCheck(int friendly)
 
 };
 int ChessBoard::IsCheck(int friendly)
@@ -261,7 +261,7 @@ vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
             continue;
         
         //we're only interested in the pieces having the colour of the one playing this turn
-        else if((friendly == 1 and board[i] > 0) or (friendly == -1 and board[i] < 0)){
+        else if((friendly == 1 && board[i] > 0) || (friendly == -1 && board[i] < 0)){
             movelist = genMoves(i, friendly, enemy);
         }
 
@@ -355,7 +355,7 @@ vector<int> ChessBoard::genMoves(int start_pos, int friendly, int enemy){
                 //9 and -9 are en passant squares. They do not have an actual piece on them
                 if(board[pos] == 0 || abs(board[pos]) == 9){
                     
-                    if((!movelist.empty() and find(movelist.begin(), movelist.end(), pos) == movelist.end()) or movelist.empty())
+                    if((!movelist.empty() && find(movelist.begin(), movelist.end(), pos) == movelist.end()) || movelist.empty())
                         movelist.push_back(pos);
                     pos += offset;
                     move_limit--;
@@ -363,13 +363,13 @@ vector<int> ChessBoard::genMoves(int start_pos, int friendly, int enemy){
 
                 //if piece is not a pawn and the square has an enemy piece in the direction the piece is moving, capture it
                 //pawns capture diagonally so must check for them here
-                else if(not pawn and ((friendly == 1 and board[pos] < 0) or (friendly == -1 and board[pos] > 0))){
+                else if( !pawn && ((friendly == 1 && board[pos] < 0) || (friendly == -1 && board[pos] > 0))){
                     movelist.push_back(pos);
                     break;
                 }
 
                 //if a friendly piece is encountered, it cannot be captured and hence we break out of the loop
-                else if((friendly == 1 and board[pos] > 0) or (friendly == -1 and board[pos] < 0))
+                else if((friendly == 1 && board[pos] > 0) || (friendly == -1 && board[pos] < 0))
                     break;
                 
             }
@@ -378,17 +378,17 @@ vector<int> ChessBoard::genMoves(int start_pos, int friendly, int enemy){
             //en passant not yet done
             if(pawn){
                 if(friendly == 1){
-                    if(edges[start_pos][5] and board[start_pos - 7] < 0)
+                    if(edges[start_pos][5] && board[start_pos - 7] < 0)
                         movelist.push_back(start_pos - 7);
-                    if(edges[start_pos][6] and board[start_pos - 9] < 0)
+                    if(edges[start_pos][6] && board[start_pos - 9] < 0)
                         movelist.push_back(start_pos - 9);
                     
                 }
             
                 else{
-                    if(edges[start_pos][4] and board[start_pos + 9] > 0)
+                    if(edges[start_pos][4] && board[start_pos + 9] > 0)
                         movelist.push_back(start_pos + 9);
-                    if(edges[start_pos][7] and board[start_pos + 7] > 0)
+                    if(edges[start_pos][7] && board[start_pos + 7] > 0)
                         movelist.push_back(start_pos + 7);
                 }
             }
@@ -435,7 +435,7 @@ vector<int> ChessBoard::checkCastle(int start_pos, vector<int> &movelist, int fr
     //checking if castling is possible
     int low_lim , up_lim;
     if(friendly == 1){
-        if((start_pos != 60) or ((board[63] != 7) and board[56] != 7))
+        if((start_pos != 60) || ((board[63] != 7) && board[56] != 7))
             return movelist;
         else{
             low_lim = 56;
@@ -443,7 +443,7 @@ vector<int> ChessBoard::checkCastle(int start_pos, vector<int> &movelist, int fr
         }
     }
     else{ 
-        if((start_pos != 4) or ((board[0] != -7) and board[7] != -7))
+        if((start_pos != 4) || ((board[0] != -7) && board[7] != -7))
             return movelist;
         else{
             low_lim = 0;
@@ -453,7 +453,7 @@ vector<int> ChessBoard::checkCastle(int start_pos, vector<int> &movelist, int fr
     }
 
     int pos = start_pos + 1;
-    while(pos < up_lim and board[pos] == 0){
+    while(pos < up_lim && board[pos] == 0){
         //check if there is a check at this position
         pos++;
         
@@ -466,7 +466,7 @@ vector<int> ChessBoard::checkCastle(int start_pos, vector<int> &movelist, int fr
 
     pos = start_pos - 1;
 
-    while(pos > low_lim and board[pos] == 0){
+    while(pos > low_lim && board[pos] == 0){
         //check if there is a check at this position
         pos--;
     }
@@ -504,7 +504,7 @@ int main(){
         
         if(i == 26)
             board[i] = -2;
-        if(i == 36 or i == 27 or i == 24 or i == 31)
+        if(i == 36 || i == 27 || i == 24 || i == 31)
             board[i] = 2;
         if(i == 45)
             board[i] = 4;
