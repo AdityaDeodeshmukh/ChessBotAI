@@ -88,7 +88,7 @@ int ChessBoard::IsCheck(int friendly)
                 break;
 
             }
-            if (board[newpos] * friendly > 0)
+            if (board[newpos] * friendly > 0 && board[newpos]*friendly!=9)
             {
                 break;
             }
@@ -144,7 +144,7 @@ int ChessBoard::IsCheck(int friendly)
                 break;
 
             }
-            if (board[newpos] * friendly > 0)
+            if (board[newpos] * friendly > 0 && board[newpos]*friendly!=9)
             {
                 break;
             }
