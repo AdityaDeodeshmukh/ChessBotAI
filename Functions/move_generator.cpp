@@ -91,6 +91,10 @@ void ChessBoard::ChangeBoard(int start,int end)
             board[end] = 1;
             board[63] = 0;
             board[(start + end) / 2] = 6;
+            if(board[56]==7)
+            {
+                board[56]=6;
+            }
             return;
         }
         if (board[start] == 1 && (end - start) < 0)
@@ -99,6 +103,10 @@ void ChessBoard::ChangeBoard(int start,int end)
             board[end] = 1;
             board[56] = 0;
             board[(start + end) / 2] = 6;
+            if(board[63]==7)
+            {
+                board[63]=6;
+            }
             return;
         }
         if (board[start] == -1 && (end - start) > 0)
@@ -106,7 +114,12 @@ void ChessBoard::ChangeBoard(int start,int end)
             board[start] = 0;
             board[end] = -1;
             board[7] = 0;
+           
             board[(start + end) / 2] = -6;
+            if(board[0]==-7)
+            {
+                board[0]=-6;
+            }
             return;
         }
         if (board[start] == -1 && (end - start) < 0)
@@ -115,10 +128,41 @@ void ChessBoard::ChangeBoard(int start,int end)
             board[end] = -1;
             board[0] = 0;
             board[(start + end) / 2] = -6;
+            if(board[7]==-7)
+            {
+                board[7]=-6;
+            }
             return;
         }
     }
-
+    if(board[start]==-1)
+    {
+        if(board[0]==-7)
+        {
+            board[0]=-6;
+        }
+        if(board[7]==-7)
+        {
+            board[7]=-6;
+        }
+    }
+    if(board[start]==1)
+    {
+        if(board[63]==7)
+        {
+            board[63]=6;
+        }
+        if(board[56]==7)
+        {
+            board[56]=6;
+        }
+    }
+    if(abs(board[start])==7)
+    {
+        board[end] = board[start]-1*friendly;
+        board[start] = 0;
+        return;  
+    }
     board[end] = board[start];
     board[start] = 0;
     return;
