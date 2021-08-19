@@ -51,10 +51,12 @@ W_PAWN=pygame.image.load(os.path.join('Assets','W_Pawn.png'))
 W_PAWN=pygame.transform.scale(W_PAWN,PEICE_SIZE)
 UPPER_BOARD=pygame.Rect(0,0,WIDTH,START_BOARD[1])
 LOWER_BOARD=pygame.Rect(0,HEIGHT-START_BOARD[1],WIDTH,START_BOARD[1])
+player=1
 ev=pygame.event.get()
 def extractlist(lst):
     return [list(el) for el in lst]
-def getsquare(coords):
+
+def getsquare(coords,player):
     
     x=coords[0]
     y=coords[1]
@@ -64,18 +66,34 @@ def getsquare(coords):
     y_ref=y-START_BOARD[1]
     x1=int(x_ref/PEICE_SIZE[0])
     y1=int(y_ref/PEICE_SIZE[0])
+    if player==-1:
+        return(7-x1,7-y1)
     return (x1,y1)
-def draw_peices(chess_board,locfinal,locinitial,peice):
+def draw_peices(ch_board,locfinal,locinitial,peice,player):
+    chess_board=ch_board.copy()
+    x=0
+    y=0
     sqrIn=(0,0)
-    sqrIn=getsquare(locinitial)
+    sqrIn=getsquare(locinitial,player)
+    if(player==-1):
+        chess_board=chess_board.flatten()
+        chess_board=chess_board[::-1]
+        chess_board=np.reshape(chess_board,(8,8))
     
     if(peice!=0):
         x=sqrIn[0]
         y=sqrIn[1]
+        if(peice!=0):
+            if(player==-1):
+                x=7-x
+                y=7-y
+        
+        
     for i in range(0,8):
         for j in range(0,8):
             offset=(0,0)
-            if sqrIn[0]==j and sqrIn[1]==i and peice!=0:
+            
+            if x==j and y==i and peice!=0:
                 continue        
             if chess_board[i][j]==1:
                 WIN.blit(W_KING,(START_BOARD[0]+j*(PEICE_SIZE[0]),START_BOARD[1]+i*(PEICE_SIZE[0])))
@@ -102,6 +120,10 @@ def draw_peices(chess_board,locfinal,locinitial,peice):
             if chess_board[i][j]==-6:
                 WIN.blit(B_ROOK,(START_BOARD[0]+j*(PEICE_SIZE[0]),START_BOARD[1]+i*(PEICE_SIZE[0])))
     offset=(locfinal[0]-locinitial[0],locfinal[1]-locinitial[1])
+    
+    
+    
+    
     if peice==1:
         WIN.blit(W_KING,(START_BOARD[0]+x*(PEICE_SIZE[0])+offset[0],START_BOARD[1]+y*(PEICE_SIZE[0])+offset[1]))
     if peice==-1:
@@ -132,14 +154,14 @@ def draw_peices(chess_board,locfinal,locinitial,peice):
 
 
 
-def draw_main(chess_board,locfinal,locinitial,peice):
+def draw_main(chess_board,locfinal,locinitial,peice,player):
     WIN.fill(BG)
     WIN.blit(BOARD,START_BOARD)
     WIN.blit(engine_text,(10,START_BOARD[1]+10))
     WIN.blit(player_text,(10,HEIGHT-START_BOARD[1]-player_text.get_height()-10))
     pygame.draw.rect(WIN,BG2,UPPER_BOARD)
     pygame.draw.rect(WIN,BG2,LOWER_BOARD)
-    draw_peices(chess_board,locfinal,locinitial,peice)
+    draw_peices(chess_board,locfinal,locinitial,peice,player)
     pygame.display.update()
 def checkpeice():
     pass
@@ -151,14 +173,15 @@ def main():
     chess_board=fen_code_parser(FEN)
     board=ChessBoard(chess_board.flatten())
     board.getEdgeDistance()
-    moveset=extractlist(list(board.genMovesForEachPiece(1)))
-    print(moveset)
+    plr=-1
+    moveset=extractlist(list(board.genMovesForEachPiece(plr)))
     run=True
     peice=0
-    chess_board=list(board.board)
+    player=1
+    chess_board=(list(board.board))
     chess_board=np.reshape(chess_board,(8,8))
     locinitial=(-1,-1)
-    plr=1
+    
     while run:
         clock.tick(FPS)
         
@@ -174,15 +197,18 @@ def main():
                     drag=True
                     locinitial=pygame.mouse.get_pos()
                     locfinal=pygame.mouse.get_pos()
-                    sqrIn=getsquare(locinitial)
+                    sqrIn=getsquare(locinitial,player)
                     peice=chess_board[sqrIn[1],sqrIn[0]]
+                    
+
 
             
             if(event.type==pygame.MOUSEBUTTONUP):
                 if event.button==1:
                     drag=False
                     locfinal=pygame.mouse.get_pos()
-                    sqrFin=getsquare(locfinal)
+                    sqrFin=getsquare(locfinal,player)
+                    
                     if(peice!=0):
                         
                         if sqrFin[0]!=65 and sqrFin!=65 and sqrIn[0]!=65 and sqrIn[1]!=65:
@@ -190,17 +216,21 @@ def main():
                             if move in moveset:
                                 board.ChangeBoard(move[0],move[1])
                                 chess_board=list(board.board)
+                                
+                                
                                 chess_board=np.reshape(chess_board,(8,8))
                                 
                                 plr=-plr
                                 moveset=extractlist(list(board.genMovesForEachPiece(plr)))
-                            print(chess_board)
+                                print(chess_board)
+                                
+
                         peice=0
                    
         if drag==True:
             locfinal=pygame.mouse.get_pos()
         
-        draw_main(chess_board,locfinal,locinitial,peice)            
+        draw_main(chess_board,locfinal,locinitial,peice,player)            
         
 
     pygame.quit()

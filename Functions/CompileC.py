@@ -88,7 +88,7 @@ def CompileClass():
         {
             board[start] = 0;
             board[end] = 2 * friendly;
-            board[(end + start) / 2] = 9 * (-friendly);
+            board[(end + start) / 2] = 9 * (friendly);
             En_pessant_pos=(end+start)/2;
             return;
         }
