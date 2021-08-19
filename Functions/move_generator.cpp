@@ -51,7 +51,6 @@ class ChessBoard{
 
         int IsCheck(int friendly);
         void ChangeBoard(int start,int end);
-
 };
 
 
@@ -75,12 +74,17 @@ void ChessBoard::ChangeBoard(int start,int end)
             return;
         }
     }
+    if(En_pessant_pos!=64)
+    {
+        board[En_pessant_pos]=0;
+    }
     En_pessant_pos = 64;
     if (abs(board[start]) == 2 && abs(end - start) == 16)
     {
         board[start] = 0;
         board[end] = 2 * friendly;
         board[(end + start) / 2] = 9 * (-friendly);
+        En_pessant_pos=(end+start)/2;
         return;
     }
     if (abs(board[start]) == 1 && abs(end - start) == 2)
@@ -657,6 +661,7 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly, int
         move.pop_back();
     }
 }
+
 
 int main(){
 

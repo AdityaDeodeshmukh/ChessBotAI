@@ -2,7 +2,12 @@ import pygame
 import numpy as np
 import os
 from Functions.FEN_parser import fen_code_parser
+from Functions.CompileC import CompileClass
+import time
 from pygame.locals import *
+import cppyy
+CompileClass()
+from cppyy.gbl import ChessBoard
 pygame.font.init()
 WHITE=(255,255,255)
 PLAYER_FONT=pygame.font.SysFont('comicsans',25)
@@ -47,9 +52,14 @@ W_PAWN=pygame.transform.scale(W_PAWN,PEICE_SIZE)
 UPPER_BOARD=pygame.Rect(0,0,WIDTH,START_BOARD[1])
 LOWER_BOARD=pygame.Rect(0,HEIGHT-START_BOARD[1],WIDTH,START_BOARD[1])
 ev=pygame.event.get()
+def extractlist(lst):
+    return [list(el) for el in lst]
 def getsquare(coords):
+    
     x=coords[0]
     y=coords[1]
+    if(x>(START_BOARD[0]+BOARD_SIZE[0])) or (x<START_BOARD[0]) or (y>(START_BOARD[1]+BOARD_SIZE[1])) or (y<START_BOARD[1]):
+        return(65,65)
     x_ref=x-START_BOARD[0]
     y_ref=y-START_BOARD[1]
     x1=int(x_ref/PEICE_SIZE[0])
@@ -134,13 +144,21 @@ def draw_main(chess_board,locfinal,locinitial,peice):
 def checkpeice():
     pass
 def main():
+    
     clock=pygame.time.Clock()
     drag=False
     FEN="rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"
     chess_board=fen_code_parser(FEN)
+    board=ChessBoard(chess_board.flatten())
+    board.getEdgeDistance()
+    moveset=extractlist(list(board.genMovesForEachPiece(1)))
+    print(moveset)
     run=True
     peice=0
+    chess_board=list(board.board)
+    chess_board=np.reshape(chess_board,(8,8))
     locinitial=(-1,-1)
+    plr=1
     while run:
         clock.tick(FPS)
         
@@ -166,10 +184,19 @@ def main():
                     locfinal=pygame.mouse.get_pos()
                     sqrFin=getsquare(locfinal)
                     if(peice!=0):
-                        chess_board[sqrIn[1],sqrIn[0]]=0
-                        chess_board[sqrFin[1],sqrFin[0]]=peice
                         
+                        if sqrFin[0]!=65 and sqrFin!=65 and sqrIn[0]!=65 and sqrIn[1]!=65:
+                            move=[sqrIn[0]+sqrIn[1]*8,sqrFin[0]+sqrFin[1]*8]
+                            if move in moveset:
+                                board.ChangeBoard(move[0],move[1])
+                                chess_board=list(board.board)
+                                chess_board=np.reshape(chess_board,(8,8))
+                                
+                                plr=-plr
+                                moveset=extractlist(list(board.genMovesForEachPiece(plr)))
+                            print(chess_board)
                         peice=0
+                   
         if drag==True:
             locfinal=pygame.mouse.get_pos()
         
