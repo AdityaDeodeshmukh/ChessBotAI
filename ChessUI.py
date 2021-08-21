@@ -23,6 +23,7 @@ BG2=(50,50,50)
 BG=(70,70,70)
 WIN=pygame.display.set_mode((WIDTH,HEIGHT))
 FPS=120
+#loading all the assets into pygame
 BOARD=pygame.image.load(os.path.join('Assets','ChessBoard.jpg'))
 BOARD=pygame.transform.scale(BOARD,BOARD_SIZE)
 B_KING=pygame.image.load(os.path.join('Assets','B_King.png'))
@@ -53,9 +54,12 @@ UPPER_BOARD=pygame.Rect(0,0,WIDTH,START_BOARD[1])
 LOWER_BOARD=pygame.Rect(0,HEIGHT-START_BOARD[1],WIDTH,START_BOARD[1])
 player=1
 ev=pygame.event.get()
+#A utility function to convert a cpp vector to a list
 def extractlist(lst):
     return [list(el) for el in lst]
-
+#A function to get the square at which the mouse is pointing
+#coords: tuple of the x and y coordinates
+#player: 1 if White and -1 if Black
 def getsquare(coords,player):
     
     x=coords[0]
@@ -68,18 +72,26 @@ def getsquare(coords,player):
     y1=int(y_ref/PEICE_SIZE[0])
     if player==-1:
         return(7-x1,7-y1)
+        #if player is playing black then the board is inverted so return 7-x and 7-y
     return (x1,y1)
+#A function to draw the peices onto the board
+#ch_board: A 2D array representation of the board
+#locinitial: The initial location of the mouse while dragging
+#locfinal: The final position of mouse while dragging
+#peice: The piece that was selected when dragging
+#player: 1 if White and -1 if Black
 def draw_peices(ch_board,locfinal,locinitial,peice,player):
     chess_board=ch_board.copy()
     x=0
     y=0
     sqrIn=(0,0)
     sqrIn=getsquare(locinitial,player)
+    #convert the 2D array to a reversed 2D array if player is playing black
     if(player==-1):
         chess_board=chess_board.flatten()
         chess_board=chess_board[::-1]
         chess_board=np.reshape(chess_board,(8,8))
-    
+    #defines the square where dragging started
     if(peice!=0):
         x=sqrIn[0]
         y=sqrIn[1]
@@ -88,13 +100,15 @@ def draw_peices(ch_board,locfinal,locinitial,peice,player):
                 x=7-x
                 y=7-y
         
-        
+    #Start drawing    
     for i in range(0,8):
         for j in range(0,8):
             offset=(0,0)
-            
+            #if the square corresponds to the square where dragging started then pass(We print that
+            # last to avoid the piece going under other pieces)
             if x==j and y==i and peice!=0:
-                continue        
+                continue  
+            #check which piece it is and print it      
             if chess_board[i][j]==1:
                 WIN.blit(W_KING,(START_BOARD[0]+j*(PEICE_SIZE[0]),START_BOARD[1]+i*(PEICE_SIZE[0])))
             if chess_board[i][j]==-1:
@@ -123,7 +137,7 @@ def draw_peices(ch_board,locfinal,locinitial,peice,player):
     
     
     
-    
+    #here we print the piece that was selected when we started dragging
     if peice==1:
         WIN.blit(W_KING,(START_BOARD[0]+x*(PEICE_SIZE[0])+offset[0],START_BOARD[1]+y*(PEICE_SIZE[0])+offset[1]))
     if peice==-1:
@@ -153,7 +167,12 @@ def draw_peices(ch_board,locfinal,locinitial,peice,player):
             
 
 
-
+#The main function to draw the board
+#chess_board: 2D array representation of the board
+#locinitial: The initial location of the mouse while dragging
+#locfinal: The final position of mouse while dragging
+#peice: The piece that was selected when dragging
+#player: 1 if White and -1 if Black
 def draw_main(chess_board,locfinal,locinitial,peice,player):
     WIN.fill(BG)
     WIN.blit(BOARD,START_BOARD)
@@ -165,12 +184,13 @@ def draw_main(chess_board,locfinal,locinitial,peice,player):
     pygame.display.update()
 def checkpeice():
     pass
+#The main body of the game
 def main():
-    
     clock=pygame.time.Clock()
     drag=False
     FEN="rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"
     chess_board=fen_code_parser(FEN)
+    #creates the board object
     board=ChessBoard(chess_board.flatten())
     board.getEdgeDistance()
     plr=-1
@@ -181,7 +201,7 @@ def main():
     chess_board=(list(board.board))
     chess_board=np.reshape(chess_board,(8,8))
     locinitial=(-1,-1)
-    
+    #main loop of the game
     while run:
         clock.tick(FPS)
         
@@ -192,6 +212,7 @@ def main():
         for event in pygame.event.get():
             if(event.type==pygame.QUIT):
                 run=False
+            #If dragging of mouse has started
             if(event.type==pygame.MOUSEBUTTONDOWN):
                 if event.button==1 and drag==False:
                     drag=True
@@ -202,7 +223,7 @@ def main():
                     
 
 
-            
+            #If dragging of mouse has stopped
             if(event.type==pygame.MOUSEBUTTONUP):
                 if event.button==1:
                     drag=False
