@@ -27,6 +27,7 @@ class ChessBoard{
         int bking_pos;
 
         int wking_pos;
+        int check_peice_pos;
             
         ChessBoard(vector<int> board){
             this->board = board;
@@ -224,6 +225,7 @@ int ChessBoard::IsCheck(int friendly)
             if (board[newpos] == -friendly * 6 || board[newpos] == -friendly * 7 || board[newpos] == -friendly * 5)
             {
                 check++;
+                check_peice_pos=board[newpos];
                 break;
             }
 
@@ -280,6 +282,7 @@ int ChessBoard::IsCheck(int friendly)
             if (board[newpos] == -friendly * 5 || board[newpos] == -friendly * 3)
             {
                 check++;
+                check_peice_pos=board[newpos];
                 break;
             }
             if (pawncheck)
@@ -287,6 +290,7 @@ int ChessBoard::IsCheck(int friendly)
                 if (board[newpos] == -friendly * 2)
                 {
                     check++;
+                    check_peice_pos=board[newpos];
                     break;
                 }
             }
@@ -329,6 +333,7 @@ int ChessBoard::IsCheck(int friendly)
             if (board[npos] == -friendly * 4)
             {
                 check++;
+                check_peice_pos=board[npos];
 
             }
         }
