@@ -40,7 +40,9 @@ class ChessBoard{
 
         int wking_pos;
         int check_piece_pos;
-            
+        
+        ChessBoard(){};
+
         ChessBoard(vector<int> board){
             this->board = board;
             En_pessant_pos=64;
@@ -484,7 +486,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
 
                 if(pos == legal_squares.end()){
 
-                    if(*move_it != friendly * 2 || *(move_it + 1) != (check_piece_pos - (8 * friendly))){
+                    if(board[*move_it] != friendly * 2 || *(move_it + 1) != (check_piece_pos - (8 * friendly))){
                         legalMoves.erase(legalMoves_it);
                         continue;
                     }
@@ -505,7 +507,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
             
             int piece_pos = *(legalMoves_it->begin());
 
-            //checking if the piece being considered is not the king
+            //checking if the piece being considered is the king
             if(piece_pos == kingpos){
                 legalMoves_it++;
                 continue;
@@ -580,6 +582,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
                 while(legalMoves_it != legalMoves.end() && *(legalMoves_it->begin()) == piece_pos){
                     auto move_it = legalMoves_it->begin() + 1;
                     auto pos = find(legal_squares.begin(), legal_squares.end(), *move_it);
+
                     if(pos == legal_squares.end()){
                         legalMoves.erase(legalMoves_it);
                     }
@@ -615,21 +618,38 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
 
     
     legalMoves_it = legalMoves.begin();
-    bool kmoves_found = false;
+    //bool kmoves_found = false;
     while(legalMoves_it != legalMoves.end()){
         bool erased = false;
         auto move_it = legalMoves_it->begin();
+
+        if(board[*move_it] == friendly * 2 && board[*(move_it + 1)] == -friendly * 9){
+            vector<int> temp_board = board;
+
+            ChessBoard temp(temp_board);
+
+            temp.edges = edges;
+
+            temp.ChangeBoard(*move_it, *(move_it + 1));
+
+            int temp_checks = temp.IsCheck(friendly);
+            
+            if(temp_checks > 0){
+                legalMoves.erase(legalMoves_it);
+                continue;
+            }
+        }
         
-        if(*move_it != kingpos && kmoves_found == false){
+        else if(*move_it != kingpos /*&& kmoves_found == false*/){
             legalMoves_it++;
             continue;
         }
 
-        else if(*move_it != kingpos && kmoves_found == true)
-            break;
+        //else if(*move_it != kingpos && kmoves_found == true)
+        //    break;
 
         else{
-            kmoves_found = true;
+            //kmoves_found = true;
             int old_kpos = kingpos;
             int new_kpos = *(move_it + 1);
             
@@ -1001,16 +1021,17 @@ int main(){
 
     vector<int> board = {-7, 0, 0, 0, -1, -3, -4, -6, -2, -2, 0, 0, -2, -2, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 2, 6, 4, 3, 5, 1, 3, 0, 7};
 
+
     for(int i = 0; i < 64; i++){
-        
-        if(i == 26)
-            board[i] = -2;
+        board[i] = 0;
+        if(i == 25)
+            board[i] = 1;
         //else if(i == 36 || i == 27 || i == 31)
         //    board[i] = 2;
-        else if(i == 27)
-            board[i] = 2;
-        else if(i == 24)
-            board[i] = -5;
+        //else if(i == 27)
+        //    board[i] = 2;
+        //else if(i == 24)
+        //    board[i] = -5;
         //else if(i == 51)
         //    board[i] = -5;
         //else if(i == 45)
@@ -1019,12 +1040,20 @@ int main(){
         //   board[i] = -5;
         //else if(i == 51)
         //    board[i] = 3;
-        else if(i == 18)
-            board[i] = -9;
+        //else if(i == 18)
+        //    board[i] = -9;
         //else if(i == 23)
         //    board[i] = 6;
-        //else if(i == 33)
-        //    board[i] = -4;
+        else if(i == 27)
+            board[i] = -2;
+        else if(i == 26)
+            board[i] = 2;
+        else if(i == 19)
+            board[i] = -9; 
+        else if(i == 4)
+            board[i] = -1; 
+        else if(i == 31)
+            board[i] = -6; 
 
         if(i % 8 == 0)
             cout<<endl;
