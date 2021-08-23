@@ -571,7 +571,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
 
                 legal_squares.push_back(enemy_pos);
 
-                while(*(legalMoves_it->begin()) == piece_pos && legalMoves_it != legalMoves.end()){
+                while(legalMoves_it != legalMoves.end() && *(legalMoves_it->begin()) == piece_pos ){
                     auto move_it = legalMoves_it->begin() + 1;
                     auto pos = find(legal_squares.begin(), legal_squares.end(), *move_it);
                     if(pos == legal_squares.end()){
@@ -1007,8 +1007,8 @@ int main(){
             board[i] = -5;
         //else if(i == 51)
         //    board[i] = -5;
-        else if(i == 45)
-            board[i] = -4;
+        //else if(i == 45)
+        //    board[i] = -4;
         //else if(i == 44)
         //   board[i] = -5;
         //else if(i == 51)
@@ -1017,8 +1017,8 @@ int main(){
             board[i] = -9;
         //else if(i == 23)
         //    board[i] = 6;
-        else if(i == 33)
-            board[i] = -4;
+        //else if(i == 33)
+        //    board[i] = -4;
 
         if(i % 8 == 0)
             cout<<endl;
@@ -1033,11 +1033,6 @@ int main(){
     b.getEdgeDistance();
     b.genMovesForEachPiece(1);
 
-    b.ChangeBoard(60, 52);
-    cout<<endl;
-
-    b.ChangeBoard(52, 60);
-    b.genMovesForEachPiece(1);
     cout<<"possible moves: "<<endl;
     for(int i = 0; i < b.legalMoves.size(); i++){
         cout<<b.legalMoves[i][0]<<", "<<b.legalMoves[i][1]<<endl;
