@@ -299,7 +299,7 @@ int ChessBoard::IsCheck(int friendly)
             {
                 break;
             }
-            if (board[newpos] == -friendly * 6 || board[newpos] == -friendly * 7)
+            if (board[newpos] == -friendly * 6 || board[newpos] == -friendly * 7||board[newpos]==-friendly*4)
             {
                 break;
             }
