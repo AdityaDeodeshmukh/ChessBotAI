@@ -505,6 +505,12 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
             
             int piece_pos = *(legalMoves_it->begin());
 
+            //checking if the piece being considered is not the king
+            if(piece_pos == kingpos){
+                legalMoves_it++;
+                continue;
+            }
+
             int piece_dir = getPieceDirection(kingpos, piece_pos);
 
             if(piece_dir == -1){
@@ -571,7 +577,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
 
                 legal_squares.push_back(enemy_pos);
 
-                while(legalMoves_it != legalMoves.end() && *(legalMoves_it->begin()) == piece_pos ){
+                while(legalMoves_it != legalMoves.end() && *(legalMoves_it->begin()) == piece_pos){
                     auto move_it = legalMoves_it->begin() + 1;
                     auto pos = find(legal_squares.begin(), legal_squares.end(), *move_it);
                     if(pos == legal_squares.end()){
