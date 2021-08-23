@@ -77,9 +77,9 @@ class ChessBoard{
 void ChessBoard::ChangeBoard(int start, int end)
 {
     if(board[start] == 1)
-        wking_pos = board[end];
+        wking_pos = end;
     if(board[start] == -1)
-        bking_pos = board[end];
+        bking_pos = end;
     
     int friendly = 0;
     if (board[start] > 0)
@@ -436,8 +436,69 @@ vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
 void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
     
     auto legalMoves_it = legalMoves.begin();
+
+    if(checks == 1){
+        int check_dir = getPieceDirection(kingpos);
+        
+        if(check_dir < 0){
+            
+
+            while(legalMoves_it != legalMoves.end()){
+                auto move_it = legalMoves_it->begin();
+
+                if(*move_it != kingpos && *(move_it + 1) != check_piece_pos){
+                    legalMoves.erase(legalMoves_it);
+                }
+
+                else
+                    legalMoves_it++;
+            }
+        }
+            
+
+        else{    
+            int num_squares = abs((kingpos - check_piece_pos) / direction_offsets[check_dir]);
+
+            vector<int> legal_squares;
+            
+            int new_pos = kingpos + direction_offsets[check_dir];
+            
+            while(num_squares > 0){
+                legal_squares.push_back(new_pos);
+                num_squares--;
+                new_pos += direction_offsets[check_dir];
+            }
+
+            
+
+            while(legalMoves_it != legalMoves.end()){
+
+                auto move_it = legalMoves_it->begin();
+
+                if(*move_it == kingpos){
+                    legalMoves_it++;
+                    continue;
+                }
+
+                auto pos = find(legal_squares.begin(), legal_squares.end(), *(move_it + 1));
+
+                if(pos == legal_squares.end()){
+
+                    if(*move_it != friendly * 2 || *(move_it + 1) != (check_piece_pos - (8 * friendly))){
+                        legalMoves.erase(legalMoves_it);
+                        continue;
+                    }
+                }
+                
+                legalMoves_it++;
+            }
+            
+        }
+    }
     
-    if(checks == 0){
+    if(checks == 0 || checks == 1){
+
+        legalMoves_it = legalMoves.begin();
         
         while(legalMoves_it != legalMoves.end()){
             
@@ -528,64 +589,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
         }
     }
 
-    else if(checks == 1){
-        int check_dir = getPieceDirection(kingpos);
-        
-        if(check_dir < 0){
-            
-
-            while(legalMoves_it != legalMoves.end()){
-                auto move_it = legalMoves_it->begin();
-
-                if(*move_it != kingpos && *(move_it + 1) != check_piece_pos){
-                    legalMoves.erase(legalMoves_it);
-                }
-
-                else
-                    legalMoves_it++;
-            }
-        }
-            
-
-        else{    
-            int num_squares = abs((kingpos - check_piece_pos) / direction_offsets[check_dir]);
-
-            vector<int> legal_squares;
-            
-            int new_pos = kingpos + direction_offsets[check_dir];
-            
-            while(num_squares > 0){
-                legal_squares.push_back(new_pos);
-                num_squares--;
-                new_pos += direction_offsets[check_dir];
-            }
-
-            
-
-            while(legalMoves_it != legalMoves.end()){
-
-                auto move_it = legalMoves_it->begin();
-
-                if(*move_it == kingpos){
-                    legalMoves_it++;
-                    continue;
-                }
-
-                auto pos = find(legal_squares.begin(), legal_squares.end(), *(move_it + 1));
-
-                if(pos == legal_squares.end()){
-
-                    if(*move_it != friendly * 2 || *(move_it + 1) != (check_piece_pos - (8 * friendly))){
-                        legalMoves.erase(legalMoves_it);
-                        continue;
-                    }
-                }
-                
-                legalMoves_it++;
-            }
-            
-        }
-    }
+    
 
     else{
         
@@ -1003,8 +1007,8 @@ int main(){
             board[i] = -5;
         //else if(i == 51)
         //    board[i] = -5;
-        //else if(i == 45)
-        //    board[i] = -4;
+        else if(i == 45)
+            board[i] = -4;
         //else if(i == 44)
         //   board[i] = -5;
         //else if(i == 51)
@@ -1029,6 +1033,11 @@ int main(){
     b.getEdgeDistance();
     b.genMovesForEachPiece(1);
 
+    b.ChangeBoard(60, 52);
+    cout<<endl;
+
+    b.ChangeBoard(52, 60);
+    b.genMovesForEachPiece(1);
     cout<<"possible moves: "<<endl;
     for(int i = 0; i < b.legalMoves.size(); i++){
         cout<<b.legalMoves[i][0]<<", "<<b.legalMoves[i][1]<<endl;
