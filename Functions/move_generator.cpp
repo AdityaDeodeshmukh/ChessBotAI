@@ -399,6 +399,7 @@ vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
     legalMoves.clear();
     
     int checks = IsCheck(friendly);
+    //cout<<"checks = "<<checks<<endl;
 
     int kingpos;
     if(friendly == 1)
@@ -438,8 +439,6 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
     
     if(checks == 0){
         
-        
-        
         while(legalMoves_it != legalMoves.end()){
             
             
@@ -462,7 +461,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
                 new_pos += direction_offsets[piece_dir];
                 if((friendly == 1 && board[new_pos] > 0) || (friendly == -1 && board[new_pos] < 0))
                     break;
-                
+
                 else if(piece_dir < 4 && (board[new_pos] == -friendly * 5 || board[new_pos] == -friendly * 6 || board[new_pos] == -friendly * 7)){
                     confine_direction = true;
                     break;
@@ -472,6 +471,9 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
                     confine_direction = true;
                     break;
                 }
+
+                else if(board[new_pos] != 0)
+                    break;
             }
             
 
@@ -573,7 +575,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
 
                 if(pos == legal_squares.end()){
 
-                    if(*move_it != friendly * 2 && *(move_it + 1) != (check_piece_pos - (8 * friendly))){
+                    if(*move_it != friendly * 2 || *(move_it + 1) != (check_piece_pos - (8 * friendly))){
                         legalMoves.erase(legalMoves_it);
                         continue;
                     }
@@ -987,7 +989,7 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
 
 int main(){
 
-    vector<int> board = {-7, 0, 0, 0, -1, -3, -4, -6, -2, -2, 0, 0, -2, -2, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 2, 6, 4, 3, 5, 1, 0, 0, 7};
+    vector<int> board = {-7, 0, 0, 0, -1, -3, -4, -6, -2, -2, 0, 0, -2, -2, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 2, 6, 4, 3, 5, 1, 3, 0, 7};
 
     for(int i = 0; i < 64; i++){
         
@@ -998,7 +1000,7 @@ int main(){
         else if(i == 27)
             board[i] = 2;
         else if(i == 24)
-            board[i] = -3;
+            board[i] = -5;
         //else if(i == 51)
         //    board[i] = -5;
         //else if(i == 45)
@@ -1011,8 +1013,8 @@ int main(){
             board[i] = -9;
         //else if(i == 23)
         //    board[i] = 6;
-        //else if(i == 35)
-        //    board[i] = 1;
+        else if(i == 33)
+            board[i] = -4;
 
         if(i % 8 == 0)
             cout<<endl;
