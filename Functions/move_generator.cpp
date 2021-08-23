@@ -9,6 +9,18 @@
 
 using namespace std;
 
+//S, E, N, W, SE, NE, NW, SW
+
+#define S 0
+#define E 1
+#define N 2
+#define W 3
+#define SE 4
+#define NE 5
+#define NW 6
+#define SW 7
+
+
 
 class ChessBoard{
     public:
@@ -27,7 +39,7 @@ class ChessBoard{
         int bking_pos;
 
         int wking_pos;
-        int check_peice_pos;
+        int check_piece_pos;
             
         ChessBoard(vector<int> board){
             this->board = board;
@@ -46,17 +58,29 @@ class ChessBoard{
 
         vector<vector<int>> genMovesForEachPiece(int friendly);
 
-        void genMoves(int start_pos, int friendly, int enemy);
+        void genMoves(int start_pos, int friendly, int checks);
 
-        void checkCastle(int start_pos, vector<int> &move, int friendly, int enemy);
+        void checkCastle(int start_pos, vector<int> &move, int friendly);
 
         int IsCheck(int friendly);
+
         void ChangeBoard(int start,int end);
+
+        void makeLegal(int friendly, int checks, int kingpos);
+
+        int getPieceDirection(int kingpos, int piece_pos = 64);
+
+        
 };
 
 
-void ChessBoard::ChangeBoard(int start,int end)
+void ChessBoard::ChangeBoard(int start, int end)
 {
+    if(board[start] == 1)
+        wking_pos = board[end];
+    if(board[start] == -1)
+        bking_pos = board[end];
+    
     int friendly = 0;
     if (board[start] > 0)
         friendly = 1;
@@ -225,7 +249,7 @@ int ChessBoard::IsCheck(int friendly)
             if (board[newpos] == -friendly * 6 || board[newpos] == -friendly * 7 || board[newpos] == -friendly * 5)
             {
                 check++;
-                check_peice_pos=board[newpos];
+                check_piece_pos = newpos;
                 break;
             }
 
@@ -282,7 +306,7 @@ int ChessBoard::IsCheck(int friendly)
             if (board[newpos] == -friendly * 5 || board[newpos] == -friendly * 3)
             {
                 check++;
-                check_peice_pos=board[newpos];
+                check_piece_pos = newpos;
                 break;
             }
             if (pawncheck)
@@ -290,7 +314,7 @@ int ChessBoard::IsCheck(int friendly)
                 if (board[newpos] == -friendly * 2)
                 {
                     check++;
-                    check_peice_pos=board[newpos];
+                    check_piece_pos = newpos;
                     break;
                 }
             }
@@ -333,7 +357,7 @@ int ChessBoard::IsCheck(int friendly)
             if (board[npos] == -friendly * 4)
             {
                 check++;
-                check_peice_pos=board[npos];
+                check_piece_pos = npos;
 
             }
         }
@@ -355,15 +379,15 @@ void ChessBoard::getEdgeDistance(){
         distance.push_back(row);
         distance.push_back(col);
         
-        int ne = (7 - row) < (7 - col) ? (7 - row) : (7 - col);
-        int se = (7 - col) < row ? (7 - col) : row;
-        int sw = row < col ? row : col;
-        int nw = (7 - row) < col ? (7 - row) : col;
+        int ne_dist = (7 - row) < (7 - col) ? (7 - row) : (7 - col);
+        int se_dist = (7 - col) < row ? (7 - col) : row;
+        int sw_dist = row < col ? row : col;
+        int nw_dist = (7 - row) < col ? (7 - row) : col;
 
-        distance.push_back(ne);
-        distance.push_back(se);
-        distance.push_back(sw);
-        distance.push_back(nw);
+        distance.push_back(ne_dist);
+        distance.push_back(se_dist);
+        distance.push_back(sw_dist);
+        distance.push_back(nw_dist);
 
         edges.push_back(distance);
         
@@ -373,33 +397,325 @@ void ChessBoard::getEdgeDistance(){
 //generates moves for each friendly piece, that is, the for the pieces whose turn it is currently
 vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
     legalMoves.clear();
-    //declaring enemy colour
-    int enemy;
-    if(friendly == 1)
-        enemy = -1;
-    else
-        enemy = 1;
     
-    //checking each square on the board for friendly pieces
-    for(int i = 0; i < 64; i++){
-        //if no piece at this position then skip
-        if(board[i] == 0 || abs(board[i]) == 9)
-            continue;
-        
-        //we're only interested in the pieces having the colour of the one playing this turn
-        else if((friendly == 1 && board[i] > 0) || (friendly == -1 && board[i] < 0)){
-            genMoves(i, friendly, enemy);
-        }
+    int checks = IsCheck(friendly);
 
-        //append list of moves to legalmoves vector
+    int kingpos;
+    if(friendly == 1)
+        kingpos = wking_pos;
+    else
+        kingpos = bking_pos;
+
+    if(checks > 1){
+        genMoves(kingpos, friendly, checks);
     }
+
+    else{    
+        //checking each square on the board for friendly pieces
+        for(int i = 0; i < 64; i++){
+            //if no piece at this position then skip
+            if(board[i] == 0 || abs(board[i]) == 9)
+                continue;
+            
+            //we're only interested in the pieces having the colour of the one playing this turn
+            else if((friendly == 1 && board[i] > 0) || (friendly == -1 && board[i] < 0)){
+                genMoves(i, friendly, checks);
+            }
+
+            //append list of moves to legalmoves vector
+        }
+    }
+
+    makeLegal(friendly, checks, kingpos);
 
     return legalMoves;
 }
 
 
+void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
+    
+    auto legalMoves_it = legalMoves.begin();
+    
+    if(checks == 0){
+        
+        
+        
+        while(legalMoves_it != legalMoves.end()){
+            
+            
+            int piece_pos = *(legalMoves_it->begin());
+
+            int piece_dir = getPieceDirection(kingpos, piece_pos);
+
+            if(piece_dir == -1){
+                legalMoves_it++;
+                continue;
+            }
+            
+
+            int new_pos = piece_pos;
+
+            vector<int> legal_squares;
+            bool confine_direction = false;
+            
+            for(int start = 0; start < edges[piece_pos][piece_dir]; start++){
+                new_pos += direction_offsets[piece_dir];
+                if((friendly == 1 && board[new_pos] > 0) || (friendly == -1 && board[new_pos] < 0))
+                    break;
+                
+                else if(piece_dir < 4 && (board[new_pos] == -friendly * 5 || board[new_pos] == -friendly * 6 || board[new_pos] == -friendly * 7)){
+                    confine_direction = true;
+                    break;
+                }
+
+                else if(piece_dir >= 4 && (board[new_pos] == -friendly * 5 || board[new_pos] == -friendly * 3)){
+                    confine_direction = true;
+                    break;
+                }
+            }
+            
+
+            if(confine_direction == true){
+
+                int opp_dir;
+                if(piece_dir < 2 || (piece_dir > 4 && piece_dir < 6))
+                    opp_dir = piece_dir + 2;
+                
+                else
+                    opp_dir = piece_dir - 2;
+                
+                int enemy_pos = new_pos;
+                
+                new_pos = piece_pos;
+                
+                for(int start = 0; start < edges[piece_pos][opp_dir]; start++){
+                    new_pos += direction_offsets[opp_dir];
+
+                    if(board[new_pos] != 0 && new_pos != kingpos){
+                        confine_direction = false;
+                        break;
+                    }
+                }
+
+                if(confine_direction == false){
+                    legalMoves_it++;
+                    break;
+                }
+
+                for(int pos = kingpos + direction_offsets[piece_dir]; pos != enemy_pos; pos += direction_offsets[piece_dir]){
+                    legal_squares.push_back(pos);
+                }
+
+                legal_squares.push_back(enemy_pos);
+
+                while(*(legalMoves_it->begin()) == piece_pos && legalMoves_it != legalMoves.end()){
+                    auto move_it = legalMoves_it->begin() + 1;
+                    auto pos = find(legal_squares.begin(), legal_squares.end(), *move_it);
+                    if(pos == legal_squares.end()){
+                        legalMoves.erase(legalMoves_it);
+                    }
+                    else{
+                        legalMoves_it++;
+                    }
+                }
+            }
+
+            else
+                legalMoves_it++;
+                        
+        }
+    }
+
+    else if(checks == 1){
+        int check_dir = getPieceDirection(kingpos);
+        
+        if(check_dir < 0){
+            
+
+            while(legalMoves_it != legalMoves.end()){
+                auto move_it = legalMoves_it->begin();
+
+                if(*move_it != kingpos && *(move_it + 1) != check_piece_pos){
+                    legalMoves.erase(legalMoves_it);
+                }
+
+                else
+                    legalMoves_it++;
+            }
+        }
+            
+
+        else{    
+            int num_squares = abs((kingpos - check_piece_pos) / direction_offsets[check_dir]);
+
+            vector<int> legal_squares;
+            
+            int new_pos = kingpos + direction_offsets[check_dir];
+            
+            while(num_squares > 0){
+                legal_squares.push_back(new_pos);
+                num_squares--;
+                new_pos += direction_offsets[check_dir];
+            }
+
+            
+
+            while(legalMoves_it != legalMoves.end()){
+
+                auto move_it = legalMoves_it->begin();
+
+                if(*move_it == kingpos){
+                    legalMoves_it++;
+                    continue;
+                }
+
+                auto pos = find(legal_squares.begin(), legal_squares.end(), *(move_it + 1));
+
+                if(pos == legal_squares.end()){
+
+                    if(*move_it != friendly * 2 && *(move_it + 1) != (check_piece_pos - (8 * friendly))){
+                        legalMoves.erase(legalMoves_it);
+                        continue;
+                    }
+                }
+                
+                legalMoves_it++;
+            }
+            
+        }
+    }
+
+    else{
+        
+        while(legalMoves_it != legalMoves.end()){
+            auto move_it = legalMoves_it->begin();
+            
+            if(*move_it != kingpos){
+                legalMoves.erase(legalMoves_it);
+                continue;
+            }
+
+            legalMoves_it++;
+        }
+    }
+
+    //legalizing king moves
+
+    
+    legalMoves_it = legalMoves.begin();
+    bool kmoves_found = false;
+    while(legalMoves_it != legalMoves.end()){
+        bool erased = false;
+        auto move_it = legalMoves_it->begin();
+        
+        if(*move_it != kingpos && kmoves_found == false){
+            legalMoves_it++;
+            continue;
+        }
+
+        else if(*move_it != kingpos && kmoves_found == true)
+            break;
+
+        else{
+            kmoves_found = true;
+            int old_kpos = kingpos;
+            int new_kpos = *(move_it + 1);
+            
+            if(friendly == 1)
+                wking_pos = new_kpos;
+            else
+                bking_pos = new_kpos;
+            
+            int temp_check = IsCheck(friendly);
+
+            if(temp_check > 0){
+
+                if(new_kpos - old_kpos == 1 && checks == 0){
+                    vector<int> temp = {kingpos, new_kpos + 1};
+                    auto castling_pos = find(legalMoves.begin(), legalMoves.end(), temp);
+
+                    if(castling_pos != legalMoves.end()){
+                        legalMoves.erase(castling_pos);
+                        legalMoves_it--;
+                    }
+                }
+
+                else if(new_kpos - old_kpos == -1 && checks == 0){
+                    vector<int> temp = {kingpos, new_kpos - 1};
+                    auto castling_pos = find(legalMoves.begin(), legalMoves.end(), temp);
+
+                    if(castling_pos != legalMoves.end()){
+                        legalMoves.erase(castling_pos);
+                        legalMoves_it--;
+                    }
+                }
+
+
+                legalMoves.erase(legalMoves_it);
+                erased = true;
+            }
+
+            if(friendly == 1)
+                wking_pos = old_kpos;
+            else
+                bking_pos = old_kpos;
+
+            if(erased == false)
+                legalMoves_it++;        
+        }
+    }
+}
+
+int ChessBoard::getPieceDirection(int kingpos, int piece_pos){
+
+    if(piece_pos == 64)
+        piece_pos = check_piece_pos;
+    
+    if(abs(board[piece_pos]) == 4)
+        return -1;
+    
+    int diff = kingpos - piece_pos;
+    if(diff < 0){
+        if(diff % 9 == 0){
+            return SE;
+        }
+        else if(diff % 8 == 0){
+            return S;
+        }
+
+        else if(diff % 7 == 0){
+            return SW;
+        }
+
+        else if(kingpos / 8 == piece_pos / 8)
+            return E;
+        
+        else
+            return -1;
+    }
+
+    else{
+        if(diff % 9 == 0){
+            return NW;
+        }
+        else if(diff % 8 == 0){
+            return N;
+        }
+
+        else if(diff % 7 == 0){
+            return NE;
+        }
+
+        else if(kingpos / 8 == piece_pos / 8)
+            return W;
+
+        else 
+            return -1;
+    }
+}
+
 //generates moves for a given piece and returns a vector of move positions for that piece
-void ChessBoard::genMoves(int start_pos, int friendly, int enemy){
+void ChessBoard::genMoves(int start_pos, int friendly, int checks){
     int start_dir;
     int end_dir;
     int move_limit = 99;
@@ -418,7 +734,8 @@ void ChessBoard::genMoves(int start_pos, int friendly, int enemy){
         case 1:
             start_dir = 0;
             end_dir = 8;
-            checkCastle(start_pos, move, friendly, enemy);
+            if(checks == 0)
+                checkCastle(start_pos, move, friendly);
             break;
         case 2:
             pawn = true;
@@ -611,9 +928,9 @@ void ChessBoard::genMoves(int start_pos, int friendly, int enemy){
 }
 
 
-void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly, int enemy){
+void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
     //checking if castling is possible
-    int low_lim , up_lim;
+    int low_lim, up_lim;
     if(friendly == 1){
         if((start_pos != 60) || ((board[63] != 7) && board[56] != 7))
             return;
@@ -670,22 +987,32 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly, int
 
 int main(){
 
-    vector<int> board = {-7, 0, 0, 0, -1, -3, -4, -6, -2, -2, 0, 0, -2, -2, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 2, 2, 2, 6, 4, 3, 5, 1, 3, 0, 6};
+    vector<int> board = {-7, 0, 0, 0, -1, -3, -4, -6, -2, -2, 0, 0, -2, -2, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 2, 6, 4, 3, 5, 1, 0, 0, 7};
 
     for(int i = 0; i < 64; i++){
         
         if(i == 26)
             board[i] = -2;
-        if(i == 36 || i == 27 || i == 24 || i == 31)
+        //else if(i == 36 || i == 27 || i == 31)
+        //    board[i] = 2;
+        else if(i == 27)
             board[i] = 2;
-        if(i == 45)
-            board[i] = 4;
-        if(i == 51)
-            board[i] = 0;
-        if(i == 18)
+        else if(i == 24)
+            board[i] = -3;
+        //else if(i == 51)
+        //    board[i] = -5;
+        //else if(i == 45)
+        //    board[i] = -4;
+        //else if(i == 44)
+        //   board[i] = -5;
+        //else if(i == 51)
+        //    board[i] = 3;
+        else if(i == 18)
             board[i] = -9;
-        if(i == 23)
-            board[i] = 6;
+        //else if(i == 23)
+        //    board[i] = 6;
+        //else if(i == 35)
+        //    board[i] = 1;
 
         if(i % 8 == 0)
             cout<<endl;
@@ -698,7 +1025,7 @@ int main(){
     ChessBoard b(board);
 
     b.getEdgeDistance();
-    b.genMovesForEachPiece(-1);
+    b.genMovesForEachPiece(1);
 
     cout<<"possible moves: "<<endl;
     for(int i = 0; i < b.legalMoves.size(); i++){
