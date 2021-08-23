@@ -129,9 +129,9 @@ def draw_peices(ch_board,locfinal,locinitial,peice,player):
                 WIN.blit(W_QUEEN,(START_BOARD[0]+j*(PEICE_SIZE[0]),START_BOARD[1]+i*(PEICE_SIZE[0])))
             if chess_board[i][j]==-5:
                 WIN.blit(B_QUEEN,(START_BOARD[0]+j*(PEICE_SIZE[0]),START_BOARD[1]+i*(PEICE_SIZE[0])))
-            if chess_board[i][j]==6:
+            if chess_board[i][j]==6 or chess_board[i][j]==7:
                 WIN.blit(W_ROOK,(START_BOARD[0]+j*(PEICE_SIZE[0]),START_BOARD[1]+i*(PEICE_SIZE[0])))
-            if chess_board[i][j]==-6:
+            if chess_board[i][j]==-6 or chess_board[i][j]==-7:
                 WIN.blit(B_ROOK,(START_BOARD[0]+j*(PEICE_SIZE[0]),START_BOARD[1]+i*(PEICE_SIZE[0])))
     offset=(locfinal[0]-locinitial[0],locfinal[1]-locinitial[1])
     
@@ -158,9 +158,9 @@ def draw_peices(ch_board,locfinal,locinitial,peice,player):
         WIN.blit(W_QUEEN,(START_BOARD[0]+x*(PEICE_SIZE[0])+offset[0],START_BOARD[1]+y*(PEICE_SIZE[0])+offset[1]))
     if peice==-5:
         WIN.blit(B_QUEEN,(START_BOARD[0]+x*(PEICE_SIZE[0])+offset[0],START_BOARD[1]+y*(PEICE_SIZE[0])+offset[1]))
-    if peice==6:
+    if peice==6 or peice== 7:
         WIN.blit(W_ROOK,(START_BOARD[0]+x*(PEICE_SIZE[0])+offset[0],START_BOARD[1]+y*(PEICE_SIZE[0])+offset[1]))
-    if peice==-6:
+    if peice==-6 or peice== -7:
         WIN.blit(B_ROOK,(START_BOARD[0]+x*(PEICE_SIZE[0])+offset[0],START_BOARD[1]+y*(PEICE_SIZE[0])+offset[1]))
 
 
@@ -189,11 +189,11 @@ def main():
     clock=pygame.time.Clock()
     drag=False
     FEN="rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"
-    chess_board=fen_code_parser(FEN)
+    chess_board,plr,half_move,full_move=fen_code_parser(FEN)
     #creates the board object
     board=ChessBoard(chess_board.flatten())
     board.getEdgeDistance()
-    plr=-1
+
     moveset=extractlist(list(board.genMovesForEachPiece(plr)))
     run=True
     peice=0
