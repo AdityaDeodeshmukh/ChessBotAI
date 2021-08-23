@@ -243,7 +243,7 @@ def main():
                                 
                                 plr=-plr
                                 moveset=extractlist(list(board.genMovesForEachPiece(plr)))
-                                print(chess_board)
+                                print(moveset)
                                 
 
                         peice=0
