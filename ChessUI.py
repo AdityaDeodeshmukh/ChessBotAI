@@ -18,11 +18,17 @@ engine_text=PLAYER_FONT.render(ENGINE,1,WHITE)
 WIDTH,HEIGHT=1280,720
 BOARD_SIZE=(640,640)
 PEICE_SIZE=(int(BOARD_SIZE[0]/8),int(BOARD_SIZE[1]/8))
-START_BOARD=(340,40)
+START_BOARD=(320,40)
 BG2=(50,50,50)
 BG=(70,70,70)
 WIN=pygame.display.set_mode((WIDTH,HEIGHT))
 FPS=120
+QUIT_START=(1040,635)
+QUIT_DIM=(81,45)
+PROM_START=(1040,341)
+PROM_DIM=(160,160)
+PROMOTE_RECT=pygame.Rect(PROM_START[0],PROM_START[1],PROM_DIM[0],PROM_DIM[1])
+QUIT_RECT=pygame.Rect(QUIT_START[0],QUIT_START[1],QUIT_DIM[0],QUIT_DIM[1])
 #loading all the assets into pygame
 BOARD=pygame.image.load(os.path.join('Assets','ChessBoard.jpg'))
 BOARD=pygame.transform.scale(BOARD,BOARD_SIZE)
@@ -52,7 +58,7 @@ W_PAWN=pygame.image.load(os.path.join('Assets','W_Pawn.png'))
 W_PAWN=pygame.transform.scale(W_PAWN,PEICE_SIZE)
 UPPER_BOARD=pygame.Rect(0,0,WIDTH,START_BOARD[1])
 LOWER_BOARD=pygame.Rect(0,HEIGHT-START_BOARD[1],WIDTH,START_BOARD[1])
-player=1
+player=-1
 ev=pygame.event.get()
 #A utility function to convert a cpp vector to a list
 def extractlist(lst):
@@ -178,8 +184,10 @@ def draw_main(chess_board,locfinal,locinitial,peice,player):
     WIN.blit(BOARD,START_BOARD)
     WIN.blit(engine_text,(10,START_BOARD[1]+10))
     WIN.blit(player_text,(10,HEIGHT-START_BOARD[1]-player_text.get_height()-10))
-    pygame.draw.rect(WIN,BG2,UPPER_BOARD)
-    pygame.draw.rect(WIN,BG2,LOWER_BOARD)
+    #pygame.draw.rect(WIN,BG2,UPPER_BOARD)
+    #pygame.draw.rect(WIN,BG2,LOWER_BOARD)
+    pygame.draw.rect(WIN,(116,150,85),PROMOTE_RECT)
+    pygame.draw.rect(WIN,(235, 87, 87),QUIT_RECT,0,8)
     draw_peices(chess_board,locfinal,locinitial,peice,player)
     pygame.display.update()
 def checkpeice():
@@ -188,7 +196,7 @@ def checkpeice():
 def main():
     clock=pygame.time.Clock()
     drag=False
-    FEN="8/8/8/2k5/2pP4/8/B7/4K3 b - d3 0 3"
+    FEN="2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
     print(chess_board)
     #creates the board object
@@ -216,11 +224,13 @@ def main():
             #If dragging of mouse has started
             if(event.type==pygame.MOUSEBUTTONDOWN):
                 if event.button==1 and drag==False:
+                    peice=0
                     drag=True
                     locinitial=pygame.mouse.get_pos()
                     locfinal=pygame.mouse.get_pos()
                     sqrIn=getsquare(locinitial,player)
-                    peice=chess_board[sqrIn[1],sqrIn[0]]
+                    if sqrIn[1] in range(0,8) and sqrIn[0] in range(0,8):
+                        peice=chess_board[sqrIn[1],sqrIn[0]]
                     
 
 
@@ -236,17 +246,14 @@ def main():
                         if sqrFin[0]!=65 and sqrFin!=65 and sqrIn[0]!=65 and sqrIn[1]!=65:
                             move=[sqrIn[0]+sqrIn[1]*8,sqrFin[0]+sqrFin[1]*8]
                             if move in moveset:
-                                board.ChangeBoard(move[0],move[1])
+                                prom=board.ChangeBoard(move[0],move[1])
+                                if(prom!=0):
+                                    board.Promote(move[1],0,plr)
                                 chess_board=list(board.board)
-                                
-                                
                                 chess_board=np.reshape(chess_board,(8,8))
-                                
                                 plr=-plr
                                 moveset=extractlist(list(board.genMovesForEachPiece(plr)))
-                                print(moveset)
-                                
-
+                                print(moveset)        
                         peice=0
                    
         if drag==True:

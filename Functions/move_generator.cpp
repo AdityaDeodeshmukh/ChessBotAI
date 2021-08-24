@@ -65,7 +65,8 @@ class ChessBoard{
 
         int IsCheck(int friendly);
 
-        void ChangeBoard(int start,int end);
+        int ChangeBoard(int start,int end);
+        void Promote(int sqr,int p,int friendly);
 
         void makeLegal(int friendly, int checks, int kingpos);
 
@@ -73,10 +74,33 @@ class ChessBoard{
 
         
 };
-
-
-void ChessBoard::ChangeBoard(int start, int end)
+void ChessBoard::Promote(int sqr, int p,int friendly)
 {
+    if(p==0){
+        board[sqr]=friendly*5;
+    }
+    if(p==1){
+        board[sqr]=friendly*4;
+    }
+    if(p==2){
+        board[sqr]=friendly*3;
+    }
+    if(p==1){
+        board[sqr]=friendly*6;
+    }
+}
+
+int ChessBoard::ChangeBoard(int start, int end)
+{   
+    int val=0;
+    if(board[start]==2 && end<=7 && end>=0)
+    {
+        val=1;
+    }
+    if(board[start]==-2 && end<=63 && end>=56)
+    {
+        val=-1;
+    }
     if(board[start] == 1)
         wking_pos = end;
     if(board[start] == -1)
@@ -88,7 +112,7 @@ void ChessBoard::ChangeBoard(int start, int end)
     if (board[start] < 0)
         friendly = -1;
     if (friendly == 0)
-        return;
+        return(val);
     if (En_pessant_pos != 64)
     {
         if (abs(board[start]) == 2 && abs(board[end]) == 9)
@@ -97,7 +121,7 @@ void ChessBoard::ChangeBoard(int start, int end)
             board[end] = 2 * friendly;
             board[end + 8 * friendly] = 0;
             En_pessant_pos = 64;
-            return;
+            return(val);
         }
     }
     if(En_pessant_pos!=64)
@@ -111,7 +135,7 @@ void ChessBoard::ChangeBoard(int start, int end)
         board[end] = 2 * friendly;
         board[(end + start) / 2] = 9 * (friendly);
         En_pessant_pos=(end+start)/2;
-        return;
+        return(val);
     }
     if (abs(board[start]) == 1 && abs(end - start) == 2)
     {
@@ -125,7 +149,7 @@ void ChessBoard::ChangeBoard(int start, int end)
             {
                 board[56]=6;
             }
-            return;
+            return(val);
         }
         if (board[start] == 1 && (end - start) < 0)
         {
@@ -137,7 +161,7 @@ void ChessBoard::ChangeBoard(int start, int end)
             {
                 board[63]=6;
             }
-            return;
+            return(val);
         }
         if (board[start] == -1 && (end - start) > 0)
         {
@@ -150,7 +174,7 @@ void ChessBoard::ChangeBoard(int start, int end)
             {
                 board[0]=-6;
             }
-            return;
+            return(val);
         }
         if (board[start] == -1 && (end - start) < 0)
         {
@@ -162,7 +186,7 @@ void ChessBoard::ChangeBoard(int start, int end)
             {
                 board[7]=-6;
             }
-            return;
+            return(val);
         }
     }
     if(board[start]==-1)
@@ -191,11 +215,11 @@ void ChessBoard::ChangeBoard(int start, int end)
     {
         board[end] = board[start]-1*friendly;
         board[start] = 0;
-        return;  
+        return(val);  
     }
     board[end] = board[start];
     board[start] = 0;
-    return;
+    return(val);
 }
 
 

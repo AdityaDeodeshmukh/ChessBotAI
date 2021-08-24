@@ -3,6 +3,7 @@ import numpy as np
 def fen_code_parser(fen_code):
     x=0
     half_move=0
+    flag=False
     full_move=0
     mult=1
     pieces= {'k' : 1, 'p' : 2, 'b' : 3, 'n' : 4, 'q' : 5, 'r' : 6}
@@ -55,9 +56,11 @@ def fen_code_parser(fen_code):
                 col=ord(char)-ord('a')
             if char.isdigit():
                 row=int(char)-1
+                flag=True
             if(char==" "):
                 x=x+1
-                chess_board[7-row][col]=-plr*9
+                if flag:
+                    chess_board[7-row][col]=-plr*9
                 continue
         if(x==4):
             if char.isdigit():
