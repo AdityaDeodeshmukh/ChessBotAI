@@ -637,6 +637,10 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
                 legalMoves.erase(legalMoves_it);
                 continue;
             }
+
+            else{
+                legalMoves_it++;
+            }
         }
         
         else if(*move_it != kingpos /*&& kmoves_found == false*/){
@@ -1023,8 +1027,8 @@ int main(){
 
     for(int i = 0; i < 64; i++){
         board[i] = 0;
-        if(i == 25)
-            board[i] = 1;
+        if(i == 26)
+            board[i] = -1;
         //else if(i == 36 || i == 27 || i == 31)
         //    board[i] = 2;
         //else if(i == 27)
@@ -1043,16 +1047,16 @@ int main(){
         //    board[i] = -9;
         //else if(i == 23)
         //    board[i] = 6;
-        else if(i == 27)
+        else if(i == 34)
             board[i] = -2;
-        else if(i == 26)
+        else if(i == 35)
             board[i] = 2;
-        else if(i == 19)
-            board[i] = -9; 
-        else if(i == 4)
-            board[i] = -1; 
-        else if(i == 31)
-            board[i] = -6; 
+        else if(i == 43)
+            board[i] = 9; 
+        else if(i == 60)
+            board[i] = 1; 
+        //else if(i == 31)
+        //    board[i] = -6; 
 
         if(i % 8 == 0)
             cout<<endl;
@@ -1065,7 +1069,7 @@ int main(){
     ChessBoard b(board);
 
     b.getEdgeDistance();
-    b.genMovesForEachPiece(1);
+    b.genMovesForEachPiece(-1);
 
     cout<<"possible moves: "<<endl;
     for(int i = 0; i < b.legalMoves.size(); i++){
