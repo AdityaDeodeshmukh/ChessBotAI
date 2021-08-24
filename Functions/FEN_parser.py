@@ -1,8 +1,7 @@
 
 import numpy as np
-def fen_code_parser(fen_code: str):
+def fen_code_parser(fen_code):
     x=0
-    plr=0
     half_move=0
     full_move=0
     mult=1
@@ -53,11 +52,12 @@ def fen_code_parser(fen_code: str):
                 continue
         if(x==3):
             if char.islower():
-                col=int(char)-int('a')
+                col=ord(char)-ord('a')
             if char.isdigit():
                 row=int(char)-1
             if(char==" "):
                 x=x+1
+                chess_board[7-row][col]=-plr*9
                 continue
         if(x==4):
             if char.isdigit():
