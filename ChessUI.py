@@ -10,28 +10,34 @@ CompileClass()
 from cppyy.gbl import ChessBoard
 pygame.font.init()
 WHITE=(255,255,255)
-PLAYER_FONT=pygame.font.SysFont('comicsans',25)
-PLAYER="You"
+BLACK=(0,0,0)
+PLAYER_FONT=pygame.font.SysFont('Inter',25)
+QUIT_FONT=pygame.font.SysFont('Inter',30)
+PLAYER="Player"
 ENGINE="Holly"
-player_text=PLAYER_FONT.render(PLAYER,1,WHITE)
-engine_text=PLAYER_FONT.render(ENGINE,1,WHITE)
+player_text=PLAYER_FONT.render(PLAYER,1,BLACK)
+engine_text=PLAYER_FONT.render(ENGINE,1,BLACK)
+quit_text=QUIT_FONT.render("Quit",1,WHITE)
 WIDTH,HEIGHT=1280,720
 BOARD_SIZE=(640,640)
 PEICE_SIZE=(int(BOARD_SIZE[0]/8),int(BOARD_SIZE[1]/8))
 START_BOARD=(320,40)
-BG2=(50,50,50)
-BG=(70,70,70)
+
 WIN=pygame.display.set_mode((WIDTH,HEIGHT))
 FPS=120
 QUIT_START=(1040,635)
 QUIT_DIM=(81,45)
 PROM_START=(1040,341)
 PROM_DIM=(160,160)
+BOT_RECT=pygame.Rect(55,40,223,65)
+PLAYER_RECT=pygame.Rect(55,615,223,65)
 PROMOTE_RECT=pygame.Rect(PROM_START[0],PROM_START[1],PROM_DIM[0],PROM_DIM[1])
 QUIT_RECT=pygame.Rect(QUIT_START[0],QUIT_START[1],QUIT_DIM[0],QUIT_DIM[1])
 #loading all the assets into pygame
 BOARD=pygame.image.load(os.path.join('Assets','ChessBoard.jpg'))
 BOARD=pygame.transform.scale(BOARD,BOARD_SIZE)
+PROMOTE_REGION=pygame.image.load(os.path.join('Assets','Promote.png'))
+PROMOTE_REGION=pygame.transform.scale(PROMOTE_REGION,(160,160))
 B_KING=pygame.image.load(os.path.join('Assets','B_King.png'))
 B_KING=pygame.transform.scale(B_KING,PEICE_SIZE)
 W_KING=pygame.image.load(os.path.join('Assets','W_King.png'))
@@ -56,6 +62,12 @@ B_PAWN=pygame.image.load(os.path.join('Assets','B_Pawn.png'))
 B_PAWN=pygame.transform.scale(B_PAWN,PEICE_SIZE)
 W_PAWN=pygame.image.load(os.path.join('Assets','W_Pawn.png'))
 W_PAWN=pygame.transform.scale(W_PAWN,PEICE_SIZE)
+BACKGROUND=pygame.image.load(os.path.join('Assets','Back.png'))
+BACKGROUND=pygame.transform.scale(BACKGROUND,(1280,720))
+BOT_IMG=pygame.image.load(os.path.join('Assets','Bot.png'))
+BOT_IMG=pygame.transform.scale(BOT_IMG,(33,33))
+PLAYER_IMG=pygame.image.load(os.path.join('Assets','Player.png'))
+PLAYER_IMG=pygame.transform.scale(PLAYER_IMG,(33,33))
 UPPER_BOARD=pygame.Rect(0,0,WIDTH,START_BOARD[1])
 LOWER_BOARD=pygame.Rect(0,HEIGHT-START_BOARD[1],WIDTH,START_BOARD[1])
 player=-1
@@ -180,14 +192,22 @@ def draw_peices(ch_board,locfinal,locinitial,peice,player):
 #peice: The piece that was selected when dragging
 #player: 1 if White and -1 if Black
 def draw_main(chess_board,locfinal,locinitial,peice,player):
-    WIN.fill(BG)
+    WIN.blit(BACKGROUND,(0,0))
+    
     WIN.blit(BOARD,START_BOARD)
-    WIN.blit(engine_text,(10,START_BOARD[1]+10))
-    WIN.blit(player_text,(10,HEIGHT-START_BOARD[1]-player_text.get_height()-10))
+    
     #pygame.draw.rect(WIN,BG2,UPPER_BOARD)
     #pygame.draw.rect(WIN,BG2,LOWER_BOARD)
-    pygame.draw.rect(WIN,(116,150,85),PROMOTE_RECT)
+    pygame.draw.rect(WIN,WHITE,BOT_RECT,0,8)
+    pygame.draw.rect(WIN,WHITE,PLAYER_RECT,0,8)
+    #pygame.draw.rect(WIN,(116,150,85),PROMOTE_RECT)
     pygame.draw.rect(WIN,(235, 87, 87),QUIT_RECT,0,8)
+    WIN.blit(PROMOTE_REGION,PROM_START)
+    WIN.blit(engine_text,(112,63))
+    WIN.blit(player_text,(112,638))
+    WIN.blit(quit_text,(1058,649))
+    WIN.blit(BOT_IMG,(71,56))
+    WIN.blit(PLAYER_IMG,(71,631))
     draw_peices(chess_board,locfinal,locinitial,peice,player)
     pygame.display.update()
 def checkpeice():
@@ -198,7 +218,7 @@ def main():
     drag=False
     FEN="2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
-    print(chess_board)
+  
     #creates the board object
     board=ChessBoard(chess_board.flatten())
     board.getEdgeDistance()
@@ -253,7 +273,7 @@ def main():
                                 chess_board=np.reshape(chess_board,(8,8))
                                 plr=-plr
                                 moveset=extractlist(list(board.genMovesForEachPiece(plr)))
-                                print(moveset)        
+                                 
                         peice=0
                    
         if drag==True:
