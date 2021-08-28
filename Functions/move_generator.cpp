@@ -8,7 +8,7 @@
 
 using namespace std;
 
-//S, E, N, W, SE, NE, NW, SW
+//defining direction macros
 
 #define S 0
 #define E 1
@@ -18,6 +18,22 @@ using namespace std;
 #define NE 5
 #define NW 6
 #define SW 7
+
+//defining piece macros
+
+#define KING 1
+#define PAWN 2
+#define BISHOP 3
+#define KNIGHT 4
+#define QUEEN 5
+#define ROOK 6
+#define ROOK_CASTLE 7
+#define EN_PASSANT_SQ 9
+#define EMPTY_SQ 0
+
+//defining colour macros
+#define WHITE 1
+#define BLACK -1
 
 
 
@@ -39,6 +55,8 @@ class ChessBoard{
 
         int wking_pos;
         int check_piece_pos;
+
+        int move_count;
         
         ChessBoard(){};
 
@@ -46,11 +64,11 @@ class ChessBoard{
             this->board = board;
             En_pessant_pos=64;
             for(int pos = 0; pos < board.size(); pos++){
-                if(board[pos] == 1)
+                if(board[pos] == WHITE * KING)
                     wking_pos = pos;
-                else if(board[pos] == -1)
+                else if(board[pos] == BLACK * KING)
                     bking_pos = pos;
-                if(abs(board[pos]) == 9)
+                if(abs(board[pos]) == EN_PASSANT_SQ)
                     En_pessant_pos=pos;
             }
         }
@@ -66,6 +84,7 @@ class ChessBoard{
         int IsCheck(int friendly);
 
         int ChangeBoard(int start,int end);
+        
         void Promote(int sqr,int p,int friendly);
 
         void makeLegal(int friendly, int checks, int kingpos);
@@ -76,50 +95,50 @@ class ChessBoard{
 };
 void ChessBoard::Promote(int sqr, int p,int friendly)
 {
-    if(p==0){
-        board[sqr]=friendly*5;
+    if (p == 0){
+        board[sqr] = friendly * QUEEN;
     }
-    if(p==1){
-        board[sqr]=friendly*4;
+    if (p == 1){
+        board[sqr] = friendly * KNIGHT;
     }
-    if(p==2){
-        board[sqr]=friendly*3;
+    if (p == 2){
+        board[sqr] = friendly * BISHOP;
     }
-    if(p==1){
-        board[sqr]=friendly*6;
+    if (p == 3){
+        board[sqr] = friendly * ROOK;
     }
 }
 
 int ChessBoard::ChangeBoard(int start, int end)
 {   
     int val=0;
-    if(board[start]==2 && end<=7 && end>=0)
+    if(board[start]==WHITE * PAWN && end<=7 && end>=0)
     {
         val=1;
     }
-    if(board[start]==-2 && end<=63 && end>=56)
+    if(board[start]==BLACK * PAWN && end<=63 && end>=56)
     {
         val=-1;
     }
-    if(board[start] == 1)
+    if(board[start] == WHITE * KING)
         wking_pos = end;
-    if(board[start] == -1)
+    if(board[start] == BLACK * KING)
         bking_pos = end;
     
     int friendly = 0;
     if (board[start] > 0)
-        friendly = 1;
+        friendly = WHITE;
     if (board[start] < 0)
-        friendly = -1;
+        friendly = BLACK;
     if (friendly == 0)
         return(val);
     if (En_pessant_pos != 64)
     {
-        if (abs(board[start]) == 2 && abs(board[end]) == 9)
+        if (abs(board[start]) == PAWN && abs(board[end]) == EN_PASSANT_SQ)
         {
-            board[start] = 0;
-            board[end] = 2 * friendly;
-            board[end + 8 * friendly] = 0;
+            board[start] = EMPTY_SQ;
+            board[end] = PAWN * friendly;
+            board[end + 8 * friendly] = EMPTY_SQ;
             En_pessant_pos = 64;
             return(val);
         }
@@ -129,96 +148,96 @@ int ChessBoard::ChangeBoard(int start, int end)
         board[En_pessant_pos]=0;
     }
     En_pessant_pos = 64;
-    if (abs(board[start]) == 2 && abs(end - start) == 16)
+    if (abs(board[start]) == PAWN && abs(end - start) == 16)
     {
-        board[start] = 0;
+        board[start] = EMPTY_SQ;
         board[end] = 2 * friendly;
-        board[(end + start) / 2] = 9 * (friendly);
+        board[(end + start) / 2] = EN_PASSANT_SQ * (friendly);
         En_pessant_pos=(end+start)/2;
         return(val);
     }
-    if (abs(board[start]) == 1 && abs(end - start) == 2)
+    if (abs(board[start]) == KING && abs(end - start) == 2)
     {
-        if (board[start] == 1 && (end - start) > 0)
+        if (board[start] == WHITE * KING && (end - start) > 0)
         {
-            board[start] = 0;
-            board[end] = 1;
-            board[63] = 0;
-            board[(start + end) / 2] = 6;
-            if(board[56]==7)
+            board[start] = EMPTY_SQ;
+            board[end] = WHITE * KING;
+            board[63] = EMPTY_SQ;
+            board[(start + end) / 2] = WHITE * ROOK;
+            if(board[56]==WHITE * ROOK_CASTLE)
             {
-                board[56]=6;
+                board[56]=WHITE * ROOK;
             }
             return(val);
         }
-        if (board[start] == 1 && (end - start) < 0)
+        if (board[start] == WHITE * KING && (end - start) < 0)
         {
-            board[start] = 0;
-            board[end] = 1;
-            board[56] = 0;
-            board[(start + end) / 2] = 6;
-            if(board[63]==7)
+            board[start] = EMPTY_SQ;
+            board[end] = WHITE * KING;
+            board[56] = EMPTY_SQ;
+            board[(start + end) / 2] = WHITE * ROOK;
+            if(board[63]==WHITE * ROOK_CASTLE)
             {
-                board[63]=6;
+                board[63]=WHITE * ROOK;
             }
             return(val);
         }
-        if (board[start] == -1 && (end - start) > 0)
+        if (board[start] == BLACK * KING && (end - start) > 0)
         {
-            board[start] = 0;
-            board[end] = -1;
-            board[7] = 0;
+            board[start] = EMPTY_SQ;
+            board[end] = BLACK * KING;
+            board[7] = EMPTY_SQ;
            
-            board[(start + end) / 2] = -6;
-            if(board[0]==-7)
+            board[(start + end) / 2] = BLACK * ROOK;
+            if(board[0]==BLACK * ROOK_CASTLE)
             {
-                board[0]=-6;
+                board[0]=BLACK * ROOK;
             }
             return(val);
         }
-        if (board[start] == -1 && (end - start) < 0)
+        if (board[start] == BLACK * KING && (end - start) < 0)
         {
-            board[start] = 0;
-            board[end] = -1;
-            board[0] = 0;
-            board[(start + end) / 2] = -6;
-            if(board[7]==-7)
+            board[start] = EMPTY_SQ;
+            board[end] = BLACK * KING;
+            board[0] = EMPTY_SQ;
+            board[(start + end) / 2] = BLACK * ROOK;
+            if(board[7]==BLACK * ROOK_CASTLE)
             {
-                board[7]=-6;
+                board[7]=BLACK * ROOK;
             }
             return(val);
         }
     }
-    if(board[start]==-1)
+    if(board[start]==BLACK * KING)
     {
-        if(board[0]==-7)
+        if(board[0]==BLACK * ROOK_CASTLE)
         {
-            board[0]=-6;
+            board[0]=BLACK * ROOK;
         }
-        if(board[7]==-7)
+        if(board[7]==BLACK * ROOK_CASTLE)
         {
-            board[7]=-6;
+            board[7]=BLACK * ROOK;
         }
     }
-    if(board[start]==1)
+    if(board[start]==WHITE * KING)
     {
-        if(board[63]==7)
+        if(board[63]==WHITE * ROOK_CASTLE)
         {
-            board[63]=6;
+            board[63]=WHITE * ROOK;
         }
-        if(board[56]==7)
+        if(board[56]==WHITE * ROOK_CASTLE)
         {
-            board[56]=6;
+            board[56]=WHITE * ROOK;
         }
     }
-    if(abs(board[start])==7)
+    if(abs(board[start])==ROOK_CASTLE)
     {
         board[end] = board[start]-1*friendly;
-        board[start] = 0;
+        board[start] = EMPTY_SQ;
         return(val);  
     }
     board[end] = board[start];
-    board[start] = 0;
+    board[start] = EMPTY_SQ;
     return(val);
 }
 
@@ -228,11 +247,11 @@ int ChessBoard::IsCheck(int friendly)
 
     int kingpos;
     int check = 0;
-    if (friendly == 1)
+    if (friendly == WHITE)
     {
         kingpos = wking_pos;
     }
-    else if (friendly == -1)
+    else if (friendly == BLACK)
     {
         kingpos = bking_pos;
     }
@@ -263,15 +282,15 @@ int ChessBoard::IsCheck(int friendly)
                 break;
 
             }
-            if (board[newpos] * friendly > 0 && board[newpos]*friendly!=9)
+            if (board[newpos] * friendly > 0 && board[newpos]*friendly!=EN_PASSANT_SQ)
             {
                 break;
             }
-            if (board[newpos] == -4 * friendly || board[newpos] == -2 * friendly || board[newpos] == -3 * friendly || board[newpos] == -1 * friendly)
+            if (board[newpos] == -KNIGHT * friendly || board[newpos] == -PAWN * friendly || board[newpos] == -BISHOP * friendly || board[newpos] == -KING * friendly)
             {
                 break;
             }
-            if (board[newpos] == -friendly * 6 || board[newpos] == -friendly * 7 || board[newpos] == -friendly * 5)
+            if (board[newpos] == -friendly * ROOK || board[newpos] == -friendly * ROOK_CASTLE || board[newpos] == -friendly * QUEEN)
             {
                 check++;
                 check_piece_pos = newpos;
@@ -292,43 +311,43 @@ int ChessBoard::IsCheck(int friendly)
             {
             case 4:
                 newpos = newpos + 8 + 1;
-                if (friendly == -1 && j == 1)
+                if (friendly == BLACK && j == 1)
                 {
                     pawncheck = true;
                 }
                 break;
             case 5:
                 newpos = newpos + 1 - 8;
-                if (friendly == 1 && j == 1)
+                if (friendly == WHITE && j == 1)
                 {
                     pawncheck = true;
                 }
                 break;
             case 6:
                 newpos = newpos - 8 - 1;
-                if (friendly == 1 && j == 1)
+                if (friendly == WHITE && j == 1)
                 {
                     pawncheck = true;
                 }
                 break;
             case 7:
                 newpos = newpos - 1 + 8;
-                if (friendly == -1 && j == 1)
+                if (friendly == BLACK && j == 1)
                 {
                     pawncheck = true;
                 }
                 break;
 
             }
-            if (board[newpos] * friendly > 0 && board[newpos]*friendly!=9)
+            if (board[newpos] * friendly > 0 && board[newpos]*friendly!=EN_PASSANT_SQ)
             {
                 break;
             }
-            if (board[newpos] == -friendly * 6 || board[newpos] == -friendly * 7||board[newpos]==-friendly*4)
+            if (board[newpos] == -friendly * ROOK || board[newpos] == -friendly * ROOK_CASTLE || board[newpos]==-friendly*KNIGHT)
             {
                 break;
             }
-            if (board[newpos] == -friendly * 5 || board[newpos] == -friendly * 3)
+            if (board[newpos] == -friendly * QUEEN || board[newpos] == -friendly * BISHOP)
             {
                 check++;
                 check_piece_pos = newpos;
@@ -336,7 +355,7 @@ int ChessBoard::IsCheck(int friendly)
             }
             if (pawncheck)
             {
-                if (board[newpos] == -friendly * 2)
+                if (board[newpos] == -friendly * PAWN)
                 {
                     check++;
                     check_piece_pos = newpos;
@@ -345,7 +364,7 @@ int ChessBoard::IsCheck(int friendly)
             }
             if (!pawncheck)
             {
-                if (board[newpos] == -friendly * 2)
+                if (board[newpos] == -friendly * PAWN)
                 {
                     break;
                 }
@@ -379,7 +398,7 @@ int ChessBoard::IsCheck(int friendly)
             int row2 = npos / 8;
             if (row1 != row2)
                 continue;
-            if (board[npos] == -friendly * 4)
+            if (board[npos] == -friendly * KNIGHT)
             {
                 check++;
                 check_piece_pos = npos;
@@ -422,12 +441,13 @@ void ChessBoard::getEdgeDistance(){
 //generates moves for each friendly piece, that is, the for the pieces whose turn it is currently
 vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
     legalMoves.clear();
+    move_count = 0;
     
     int checks = IsCheck(friendly);
     //cout<<"checks = "<<checks<<endl;
 
     int kingpos;
-    if(friendly == 1)
+    if(friendly == WHITE)
         kingpos = wking_pos;
     else
         kingpos = bking_pos;
@@ -440,11 +460,11 @@ vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
         //checking each square on the board for friendly pieces
         for(int i = 0; i < 64; i++){
             //if no piece at this position then skip
-            if(board[i] == 0 || abs(board[i]) == 9)
+            if(board[i] == EMPTY_SQ || abs(board[i]) == EN_PASSANT_SQ)
                 continue;
             
             //we're only interested in the pieces having the colour of the one playing this turn
-            else if((friendly == 1 && board[i] > 0) || (friendly == -1 && board[i] < 0)){
+            else if((friendly == WHITE && board[i] > 0) || (friendly == BLACK && board[i] < 0)){
                 genMoves(i, friendly, checks);
             }
 
@@ -509,7 +529,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
 
                 if(pos == legal_squares.end()){
 
-                    if(board[*move_it] != friendly * 2 || *(move_it + 1) != (check_piece_pos - (8 * friendly))){
+                    if(board[*move_it] != friendly * PAWN || *(move_it + 1) != (check_piece_pos - (8 * friendly))){
                         legalMoves.erase(legalMoves_it);
                         continue;
                     }
@@ -551,20 +571,20 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
             
             for(int start = 0; start < edges[piece_pos][piece_dir]; start++){
                 new_pos += direction_offsets[piece_dir];
-                if((friendly == 1 && board[new_pos] > 0) || (friendly == -1 && board[new_pos] < 0))
+                if((friendly == WHITE && board[new_pos] > 0) || (friendly == BLACK && board[new_pos] < 0))
                     break;
 
-                else if(piece_dir < 4 && (board[new_pos] == -friendly * 5 || board[new_pos] == -friendly * 6 || board[new_pos] == -friendly * 7)){
+                else if(piece_dir < 4 && (board[new_pos] == -friendly * QUEEN || board[new_pos] == -friendly * ROOK || board[new_pos] == -friendly * ROOK_CASTLE)){
                     confine_direction = true;
                     break;
                 }
 
-                else if(piece_dir >= 4 && (board[new_pos] == -friendly * 5 || board[new_pos] == -friendly * 3)){
+                else if(piece_dir >= 4 && (board[new_pos] == -friendly * QUEEN || board[new_pos] == -friendly * BISHOP)){
                     confine_direction = true;
                     break;
                 }
 
-                else if(board[new_pos] != 0)
+                else if(board[new_pos] != EMPTY_SQ)
                     break;
             }
             
@@ -572,7 +592,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
             if(confine_direction == true){
 
                 int opp_dir;
-                if(piece_dir < 2 || (piece_dir > 4 && piece_dir < 6))
+                if(piece_dir < 2 || (piece_dir >= 4 && piece_dir < 6))
                     opp_dir = piece_dir + 2;
                 
                 else
@@ -585,7 +605,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
                 for(int start = 0; start < edges[piece_pos][opp_dir]; start++){
                     new_pos += direction_offsets[opp_dir];
 
-                    if(board[new_pos] != 0 && new_pos != kingpos){
+                    if(board[new_pos] != EMPTY_SQ && new_pos != kingpos){
                         confine_direction = false;
                         break;
                     }
@@ -646,7 +666,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
         bool erased = false;
         auto move_it = legalMoves_it->begin();
 
-        if(board[*move_it] == friendly * 2 && board[*(move_it + 1)] == -friendly * 9){
+        if(board[*move_it] == friendly * PAWN && board[*(move_it + 1)] == -friendly * EN_PASSANT_SQ){
             vector<int> temp_board = board;
 
             ChessBoard temp(temp_board);
@@ -666,8 +686,13 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
                 legalMoves_it++;
             }
         }
+
+
+        if(board[*move_it] == friendly * PAWN && ((*(move_it + 1) >= 0 && *(move_it + 1) <= 7) || (*(move_it + 1) >= 56 && *(move_it + 1) <= 63))){
+            move_count += 3;
+        }
         
-        else if(*move_it != kingpos /*&& kmoves_found == false*/){
+        if(*move_it != kingpos /*&& kmoves_found == false*/){
             legalMoves_it++;
             continue;
         }
@@ -678,14 +703,19 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
         else{
             //kmoves_found = true;
             int old_kpos = kingpos;
+            
             int new_kpos = *(move_it + 1);
             
-            if(friendly == 1)
+            board[old_kpos] = EMPTY_SQ;
+
+            if(friendly == WHITE)
                 wking_pos = new_kpos;
             else
                 bking_pos = new_kpos;
             
             int temp_check = IsCheck(friendly);
+
+            board[old_kpos] = friendly * KING;
 
             if(temp_check > 0){
 
@@ -723,6 +753,8 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
                 legalMoves_it++;        
         }
     }
+
+    move_count += legalMoves.size();
 }
 
 int ChessBoard::getPieceDirection(int kingpos, int piece_pos){
@@ -730,7 +762,7 @@ int ChessBoard::getPieceDirection(int kingpos, int piece_pos){
     if(piece_pos == 64)
         piece_pos = check_piece_pos;
     
-    if(abs(board[piece_pos]) == 4)
+    if(abs(board[piece_pos]) == KNIGHT)
         return -1;
     
     int diff = kingpos - piece_pos;
@@ -843,11 +875,11 @@ void ChessBoard::genMoves(int start_pos, int friendly, int checks){
             //move limit is important for pieces like kings and pawns which can only move a 
             //limited number of squares in a particular direction
             
-            if(abs(board[start_pos]) == 1 || (board[start_pos] == -2 && start_pos > 15) || (board[start_pos] == 2 && start_pos < 48))
+            if(abs(board[start_pos]) == KING || (board[start_pos] == BLACK * PAWN && start_pos > 15) || (board[start_pos] == WHITE * PAWN && start_pos < 48))
                 move_limit = 1;
             
             //checking for pawn in starting position
-            else if((board[start_pos] == -2 && start_pos > 7 && start_pos < 16) || (board[start_pos] == 2 && start_pos < 56 && start_pos > 47))
+            else if((board[start_pos] == BLACK * PAWN && start_pos > 7 && start_pos < 16) || (board[start_pos] == WHITE * PAWN && start_pos < 56 && start_pos > 47))
                 move_limit = 2;
             
             //iterating until the edge in the current direction is reached
@@ -857,7 +889,7 @@ void ChessBoard::genMoves(int start_pos, int friendly, int checks){
                 
                 //if current position is empty, add it to move vector and increase the position by the offset
                 //9 and -9 are en passant squares. They do not have an actual piece on them
-                if(board[pos] == 0 || abs(board[pos]) == 9){
+                if(board[pos] == EMPTY_SQ || abs(board[pos]) == EN_PASSANT_SQ){
                     
                     //if((!legalMoves.empty() && find(legalMoves.begin(), legalMoves.end(), move) == legalMoves.end()) || legalMoves.empty()){
                         
@@ -878,7 +910,7 @@ void ChessBoard::genMoves(int start_pos, int friendly, int checks){
                 }
 
                 //if a friendly piece is encountered, it cannot be captured and hence we break out of the loop
-                else if((friendly == 1 && board[pos] > 0) || (friendly == -1 && board[pos] < 0)){
+                else if((friendly == WHITE && board[pos] > 0) || (friendly == BLACK && board[pos] < 0)){
                     move.pop_back();
                     break;
                 }
@@ -888,9 +920,9 @@ void ChessBoard::genMoves(int start_pos, int friendly, int checks){
             }
 
             //addtional pawn moves like enpassant or attacking
-            //en passant not yet done
+            
             if(pawn){
-                if(friendly == 1){
+                if(friendly == WHITE){
                     if(edges[start_pos][5] && board[start_pos - 7] < 0){
                         move.push_back(start_pos - 7);
                         legalMoves.push_back(move);
@@ -925,56 +957,56 @@ void ChessBoard::genMoves(int start_pos, int friendly, int checks){
         int row = start_pos / 8;
         int col = start_pos % 8;
 
-        if((row + 2 < 8) && (col + 1 < 8) && ((friendly == 1 && board[(row + 2) * 8 + col + 1] <= 0) || friendly == -1 && board[(row + 2) * 8 + col + 1] >= 0))
+        if((row + 2 < 8) && (col + 1 < 8) && ((friendly == WHITE && board[(row + 2) * 8 + col + 1] <= 0) || friendly == BLACK && board[(row + 2) * 8 + col + 1] >= 0))
         {
             move.push_back((row + 2) * 8 + col + 1);
             legalMoves.push_back(move);
             move.pop_back();
         }
 
-        if((row + 2 < 8) && (col - 1 >= 0) && ((friendly == 1 && board[(row + 2) * 8 + col - 1] <= 0) || friendly == -1 && board[(row + 2) * 8 + col - 1] >= 0))
+        if((row + 2 < 8) && (col - 1 >= 0) && ((friendly == WHITE && board[(row + 2) * 8 + col - 1] <= 0) || friendly == BLACK && board[(row + 2) * 8 + col - 1] >= 0))
         {
             move.push_back((row + 2) * 8 + col - 1);
             legalMoves.push_back(move);
             move.pop_back();
         }
 
-        if((row - 2 >= 0) && (col + 1 < 8) && ((friendly == 1 && board[(row - 2) * 8 + col + 1] <= 0) || friendly == -1 && board[(row - 2) * 8 + col + 1] >= 0))
+        if((row - 2 >= 0) && (col + 1 < 8) && ((friendly == WHITE && board[(row - 2) * 8 + col + 1] <= 0) || friendly == BLACK && board[(row - 2) * 8 + col + 1] >= 0))
         {
             move.push_back((row - 2) * 8 + col + 1);
             legalMoves.push_back(move);
             move.pop_back();
         }
 
-        if((row - 2 >= 0) && (col - 1 >= 0) && ((friendly == 1 && board[(row - 2) * 8 + col - 1] <= 0) || friendly == -1 && board[(row - 2) * 8 + col - 1] >= 0))
+        if((row - 2 >= 0) && (col - 1 >= 0) && ((friendly == WHITE && board[(row - 2) * 8 + col - 1] <= 0) || friendly == BLACK && board[(row - 2) * 8 + col - 1] >= 0))
         {
             move.push_back((row - 2) * 8 + col - 1);
             legalMoves.push_back(move);
             move.pop_back();
         }
 
-        if((row + 1 < 8) && (col + 2 < 8) && ((friendly == 1 && board[(row + 1) * 8 + col + 2] <= 0) || friendly == -1 && board[(row + 1) * 8 + col + 2] >= 0))
+        if((row + 1 < 8) && (col + 2 < 8) && ((friendly == WHITE && board[(row + 1) * 8 + col + 2] <= 0) || friendly == BLACK && board[(row + 1) * 8 + col + 2] >= 0))
         {
             move.push_back((row + 1) * 8 + col + 2);
             legalMoves.push_back(move);
             move.pop_back();
         }
 
-        if((row - 1 >=0) && (col + 2 < 8) && ((friendly == 1 && board[(row - 1) * 8 + col + 2] <= 0) || friendly == -1 && board[(row - 1) * 8 + col + 2] >= 0))
+        if((row - 1 >=0) && (col + 2 < 8) && ((friendly == WHITE && board[(row - 1) * 8 + col + 2] <= 0) || friendly == BLACK && board[(row - 1) * 8 + col + 2] >= 0))
         {
             move.push_back((row - 1) * 8 + col + 2);
             legalMoves.push_back(move);
             move.pop_back();
         }
 
-        if((row + 1 < 8) && (col - 2 >= 0) && ((friendly == 1 && board[(row + 1) * 8 + col - 2] <= 0) || friendly == -1 && board[(row + 1) * 8 + col - 2] >= 0))
+        if((row + 1 < 8) && (col - 2 >= 0) && ((friendly == WHITE && board[(row + 1) * 8 + col - 2] <= 0) || friendly == BLACK && board[(row + 1) * 8 + col - 2] >= 0))
         {
             move.push_back((row + 1) * 8 + col - 2);
             legalMoves.push_back(move);
             move.pop_back();
         }
 
-        if((row - 1 >= 0) && (col - 2 >= 0) && ((friendly == 1 && board[(row - 1) * 8 + col - 2] <= 0) || friendly == -1 && board[(row - 1) * 8 + col - 2] >= 0))
+        if((row - 1 >= 0) && (col - 2 >= 0) && ((friendly == WHITE && board[(row - 1) * 8 + col - 2] <= 0) || friendly == BLACK && board[(row - 1) * 8 + col - 2] >= 0))
         {
             move.push_back((row - 1) * 8 + col - 2);
             legalMoves.push_back(move);
@@ -990,8 +1022,8 @@ void ChessBoard::genMoves(int start_pos, int friendly, int checks){
 void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
     //checking if castling is possible
     int low_lim, up_lim;
-    if(friendly == 1){
-        if((start_pos != 60) || ((board[63] != 7) && board[56] != 7))
+    if(friendly == WHITE){
+        if((start_pos != 60) || ((board[63] != WHITE * ROOK_CASTLE) && board[56] != WHITE * ROOK_CASTLE))
             return;
         else{
             low_lim = 56;
@@ -999,7 +1031,7 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
         }
     }
     else{ 
-        if((start_pos != 4) || ((board[0] != -7) && board[7] != -7))
+        if((start_pos != 4) || ((board[0] != BLACK * ROOK_CASTLE) && board[7] != BLACK * ROOK_CASTLE))
             return;
         else{
             low_lim = 0;
@@ -1009,13 +1041,13 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
     }
 
     int pos = start_pos + 1;
-    while(pos < up_lim && board[pos] == 0){
+    while(pos < up_lim && board[pos] == EMPTY_SQ){
         //check if there is a check at this position
         pos++;
         
     }
     
-    if(pos == up_lim && abs(board[pos]) == 7){
+    if(pos == up_lim && abs(board[pos]) == ROOK_CASTLE){
         //move.push_back(start_pos + 1);
         //legalMoves.push_back(move);
         //move.pop_back();
@@ -1027,12 +1059,12 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
 
     pos = start_pos - 1;
 
-    while(pos > low_lim && board[pos] == 0){
+    while(pos > low_lim && board[pos] == EMPTY_SQ){
         //check if there is a check at this position
         pos--;
     }
     
-    if(pos == low_lim && abs(board[pos]) == 7){
+    if(pos == low_lim && abs(board[pos]) == ROOK_CASTLE){
         //move.push_back(start_pos - 1);
         //legalMoves.push_back(move);
         //move.pop_back();
@@ -1046,13 +1078,13 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
 
 int main(){
 
-    vector<int> board = {-7, 0, 0, 0, -1, -3, -4, -6, -2, -2, 0, 0, -2, -2, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 2, 6, 4, 3, 5, 1, 3, 0, 7};
+    vector<int> board = {-7, -4, -3, -5, -1, -3, -4, -6, -2, -2, -2, -2, 0, -2, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 6, 4, 3, 5, 1, 3, 4, 7};
 
 
     for(int i = 0; i < 64; i++){
-        board[i] = 0;
-        if(i == 26)
-            board[i] = -1;
+        //board[i] = 0;
+        //if(i == 26)
+        //    board[i] = -1;
         //else if(i == 36 || i == 27 || i == 31)
         //    board[i] = 2;
         //else if(i == 27)
@@ -1071,14 +1103,18 @@ int main(){
         //    board[i] = -9;
         //else if(i == 23)
         //    board[i] = 6;
-        else if(i == 34)
-            board[i] = -2;
-        else if(i == 35)
-            board[i] = 2;
-        else if(i == 43)
-            board[i] = 9; 
-        else if(i == 60)
-            board[i] = 1; 
+        if(i == 48)
+            board[i] = BLACK * PAWN;
+        /*if(i == 4)
+            board[i] = BLACK * KING;
+
+        if(i == 60)
+            board[i] = WHITE * KING;
+        else if(i == 28)
+            board[i] = BLACK * PAWN;
+        else if(i == 31)
+            board[i] = WHITE * QUEEN; 
+        */
         //else if(i == 31)
         //    board[i] = -6; 
 
@@ -1093,11 +1129,13 @@ int main(){
     ChessBoard b(board);
 
     b.getEdgeDistance();
-    b.genMovesForEachPiece(-1);
+    b.genMovesForEachPiece(BLACK);
 
     cout<<"possible moves: "<<endl;
     for(int i = 0; i < b.legalMoves.size(); i++){
         cout<<b.legalMoves[i][0]<<", "<<b.legalMoves[i][1]<<endl;
     }
+
+    
     
 }
