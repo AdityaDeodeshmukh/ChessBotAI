@@ -759,10 +759,14 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
 
 int ChessBoard::getPieceDirection(int kingpos, int piece_pos){
 
-    if(piece_pos == 64)
+    bool check = false;
+
+    if(piece_pos == 64){
         piece_pos = check_piece_pos;
+        check = true;
+    }
     
-    if(abs(board[piece_pos]) == KNIGHT)
+    if(abs(board[piece_pos]) == KNIGHT && check == true)
         return -1;
     
     int diff = kingpos - piece_pos;
