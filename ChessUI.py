@@ -77,6 +77,10 @@ ev=pygame.event.get()
 #A utility function to convert a cpp vector to a list
 def extractlist(lst):
     return [list(el) for el in lst]
+def checkInside(coords,c1,c2):
+    if(coords[0] in range(c1[0],c2[0]) and coords[1] in range(c1[1],c2[1])):
+        return True
+    return False
 #A function to get the square at which the mouse is pointing
 #coords: tuple of the x and y coordinates
 #player: 1 if White and -1 if Black
@@ -193,11 +197,20 @@ def draw_peices(ch_board,locfinal,locinitial,peice,player):
 #locfinal: The final position of mouse while dragging
 #peice: The piece that was selected when dragging
 #player: 1 if White and -1 if Black
-def draw_main(chess_board,locfinal,locinitial,peice,player):
+def draw_promote(prom):
+    if(prom==1):
+        WIN.blit(W_QUEEN,(PROM_START))
+        WIN.blit(W_KNIGHT,(PROM_START[0],PROM_START[1]+80))
+        WIN.blit(W_BISHOP,(PROM_START[0]+80,PROM_START[1]))
+        WIN.blit(W_ROOK,(PROM_START[0]+80,PROM_START[1]+80))
+    if(prom==-1):
+        WIN.blit(B_QUEEN,(PROM_START))
+        WIN.blit(B_KNIGHT,(PROM_START[0],PROM_START[1]+80))
+        WIN.blit(B_BISHOP,(PROM_START[0]+80,PROM_START[1]))
+        WIN.blit(B_ROOK,(PROM_START[0]+80,PROM_START[1]+80))
+def draw_main(chess_board,locfinal,locinitial,peice,player,prom):
     WIN.blit(BACKGROUND,(0,0))
-    
     WIN.blit(BOARD,START_BOARD)
-    
     #pygame.draw.rect(WIN,BG2,UPPER_BOARD)
     #pygame.draw.rect(WIN,BG2,LOWER_BOARD)
     pygame.draw.rect(WIN,WHITE,BOT_RECT,0,8)
@@ -211,14 +224,18 @@ def draw_main(chess_board,locfinal,locinitial,peice,player):
     WIN.blit(BOT_IMG,(71,56))
     WIN.blit(PLAYER_IMG,(71,631))
     draw_peices(chess_board,locfinal,locinitial,peice,player)
+    if prom!=0:
+        draw_promote(prom)
     pygame.display.update()
 def checkpeice():
     pass
 #The main body of the game
 def main():
     clock=pygame.time.Clock()
+    prom=0
+    prom_sqr=(65,65)
     drag=False
-    FEN="3k4/3p4/8/K1P4r/8/8/8/8 b - - 0 1"
+    FEN="3k4/3p4/K7/2P4r/8/8/8/8 b - - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
   
     #creates the board object
@@ -244,7 +261,7 @@ def main():
             if(event.type==pygame.QUIT):
                 run=False
             #If dragging of mouse has started
-            if(event.type==pygame.MOUSEBUTTONDOWN):
+            if(event.type==pygame.MOUSEBUTTONDOWN and prom==0):
                 if event.button==1 and drag==False:
                     peice=0
                     drag=True
@@ -253,11 +270,11 @@ def main():
                     sqrIn=getsquare(locinitial,player)
                     if sqrIn[1] in range(0,8) and sqrIn[0] in range(0,8):
                         peice=chess_board[sqrIn[1],sqrIn[0]]
-                    
+            
 
 
             #If dragging of mouse has stopped
-            if(event.type==pygame.MOUSEBUTTONUP):
+            if(event.type==pygame.MOUSEBUTTONUP and prom==0):
                 if event.button==1:
                     drag=False
                     locfinal=pygame.mouse.get_pos()
@@ -269,19 +286,66 @@ def main():
                             move=[sqrIn[0]+sqrIn[1]*8,sqrFin[0]+sqrFin[1]*8]
                             if move in moveset:
                                 prom=board.ChangeBoard(move[0],move[1])
+                                
                                 if(prom!=0):
-                                    board.Promote(move[1],0,plr)
+                                    prom_sqr=move[1]
                                 chess_board=list(board.board)
                                 chess_board=np.reshape(chess_board,(8,8))
-                                plr=-plr
-                                moveset=extractlist(list(board.genMovesForEachPiece(plr)))
-                                 
+                                
+                                if(prom==0):
+                                    plr=-plr
+                                    moveset=extractlist(list(board.genMovesForEachPiece(plr)))
+                                    
                         peice=0
+            if(event.type==pygame.MOUSEBUTTONDOWN and prom!=0):
+                if event.button==1 and drag==False:
+                    drag=True
+                    locinitial=pygame.mouse.get_pos()
+                    locfinal=pygame.mouse.get_pos()
+            if(event.type==pygame.MOUSEBUTTONUP and prom!=0):
+                if event.button==1:
+                    locfinal=pygame.mouse.get_pos()
+                    drag=False
+                    if(checkInside(locinitial,PROM_START,(PROM_START[0]+80,PROM_START[1]+80)) and checkInside(locfinal,PROM_START,(PROM_START[0]+80,PROM_START[1]+80))):
+                        board.Promote(prom_sqr,0,prom)
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        plr=-plr
+                        moveset=extractlist(list(board.genMovesForEachPiece(plr)))
+                        prom=0
+                        prom_sqr=(65,65)
+                        
+                    elif(checkInside(locinitial,(PROM_START[0]+80,PROM_START[1]),(PROM_START[0]+160,PROM_START[1]+80)) and checkInside(locfinal,(PROM_START[0]+80,PROM_START[1]),(PROM_START[0]+160,PROM_START[1]+80))):
+                        board.Promote(prom_sqr,2,prom)
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        plr=-plr
+                        moveset=extractlist(list(board.genMovesForEachPiece(plr)))
+                        prom=0
+                        prom_sqr=(65,65)
+                    elif(checkInside(locinitial,(PROM_START[0],PROM_START[1]+80),(PROM_START[0]+80,PROM_START[1]+160)) and checkInside(locfinal,(PROM_START[0],PROM_START[1]+80),(PROM_START[0]+80,PROM_START[1]+160))):
+                        board.Promote(prom_sqr,1,prom)
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        plr=-plr
+                        moveset=extractlist(list(board.genMovesForEachPiece(plr)))
+                        prom=0
+                        prom_sqr=(65,65)
+                    elif(checkInside(locinitial,(PROM_START[0]+80,PROM_START[1]+80),(PROM_START[0]+160,PROM_START[1]+160)) and checkInside(locfinal,(PROM_START[0]+80,PROM_START[1]+80),(PROM_START[0]+160,PROM_START[1]+160))):
+                        board.Promote(prom_sqr,3,prom)
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        plr=-plr
+                        moveset=extractlist(list(board.genMovesForEachPiece(plr)))
+                        prom=0
+                        prom_sqr=(65,65)
+                    
+                    
                    
         if drag==True:
             locfinal=pygame.mouse.get_pos()
         
-        draw_main(chess_board,locfinal,locinitial,peice,player)            
+        draw_main(chess_board,locfinal,locinitial,peice,player,prom)            
         
 
     pygame.quit()
