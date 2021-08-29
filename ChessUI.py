@@ -41,35 +41,35 @@ BOARD=pygame.transform.scale(BOARD,BOARD_SIZE)
 PROMOTE_REGION=pygame.image.load(os.path.join('Assets','Promote.png')).convert_alpha()
 PROMOTE_REGION=pygame.transform.scale(PROMOTE_REGION,(160,160))
 B_KING=pygame.image.load(os.path.join('Assets','B_King.png')).convert_alpha()
-B_KING=pygame.transform.scale(B_KING,PEICE_SIZE)
+
 W_KING=pygame.image.load(os.path.join('Assets','W_King.png')).convert_alpha()
-W_KING=pygame.transform.scale(W_KING,PEICE_SIZE)
+
 B_QUEEN=pygame.image.load(os.path.join('Assets','B_Queen.png')).convert_alpha()
-B_QUEEN=pygame.transform.scale(B_QUEEN,PEICE_SIZE)
+
 W_QUEEN=pygame.image.load(os.path.join('Assets','W_Queen.png')).convert_alpha()
-W_QUEEN=pygame.transform.scale(W_QUEEN,PEICE_SIZE)
+
 B_ROOK=pygame.image.load(os.path.join('Assets','B_Rook.png')).convert_alpha()
-B_ROOK=pygame.transform.scale(B_ROOK,PEICE_SIZE)
+
 W_ROOK=pygame.image.load(os.path.join('Assets','W_Rook.png')).convert_alpha()
-W_ROOK=pygame.transform.scale(W_ROOK,PEICE_SIZE)
+
 B_KNIGHT=pygame.image.load(os.path.join('Assets','B_Knight.png')).convert_alpha()
-B_KNIGHT=pygame.transform.scale(B_KNIGHT,PEICE_SIZE)
+
 W_KNIGHT=pygame.image.load(os.path.join('Assets','W_Knight.png')).convert_alpha()
-W_KNIGHT=pygame.transform.scale(W_KNIGHT,PEICE_SIZE)
+
 B_BISHOP=pygame.image.load(os.path.join('Assets','B_Bishop.png')).convert_alpha()
-B_BISHOP=pygame.transform.scale(B_BISHOP,PEICE_SIZE)
+
 W_BISHOP=pygame.image.load(os.path.join('Assets','W_Bishop.png')).convert_alpha()
-W_BISHOP=pygame.transform.scale(W_BISHOP,PEICE_SIZE)
+
 B_PAWN=pygame.image.load(os.path.join('Assets','B_Pawn.png')).convert_alpha()
-B_PAWN=pygame.transform.scale(B_PAWN,PEICE_SIZE)
+
 W_PAWN=pygame.image.load(os.path.join('Assets','W_Pawn.png')).convert_alpha()
-W_PAWN=pygame.transform.scale(W_PAWN,PEICE_SIZE)
+
 BACKGROUND=pygame.image.load(os.path.join('Assets','Back.png')).convert_alpha()
-BACKGROUND=pygame.transform.scale(BACKGROUND,(1280,720))
+
 BOT_IMG=pygame.image.load(os.path.join('Assets','Bot.png')).convert_alpha()
-BOT_IMG=pygame.transform.scale(BOT_IMG,(33,33))
+
 PLAYER_IMG=pygame.image.load(os.path.join('Assets','Player.png')).convert_alpha()
-PLAYER_IMG=pygame.transform.scale(PLAYER_IMG,(33,33))
+
 UPPER_BOARD=pygame.Rect(0,0,WIDTH,START_BOARD[1])
 LOWER_BOARD=pygame.Rect(0,HEIGHT-START_BOARD[1],WIDTH,START_BOARD[1])
 player=-1
@@ -235,7 +235,7 @@ def main():
     prom=0
     prom_sqr=(65,65)
     drag=False
-    FEN="3k4/3p4/K7/2P4r/8/8/8/8 b - - 0 1"
+    FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
   
     #creates the board object
