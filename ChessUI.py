@@ -218,7 +218,7 @@ def checkpeice():
 def main():
     clock=pygame.time.Clock()
     drag=False
-    FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    FEN="3k4/3p4/8/K1P4r/8/8/8/8 b - - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
   
     #creates the board object
