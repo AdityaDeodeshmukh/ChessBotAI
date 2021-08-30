@@ -57,10 +57,12 @@ class ChessBoard{
         int check_piece_pos;
 
         int move_count;
+        int half_move;
         
         ChessBoard(){};
 
-        ChessBoard(vector<int> board){
+        ChessBoard(vector<int> board,int half){
+            half_move=half;
             this->board = board;
             En_pessant_pos=64;
             for(int pos = 0; pos < board.size(); pos++){
@@ -71,6 +73,13 @@ class ChessBoard{
                 if(abs(board[pos]) == EN_PASSANT_SQ)
                     En_pessant_pos=pos;
             }
+        }
+        ChessBoard(const ChessBoard &old_board)
+        {
+            edges=old_board.edges;
+            bking_pos=old_board.bking_pos;
+            wking_pos=old_board.wking_pos;
+            board=old_board.board;
         }
         
         void getEdgeDistance();
@@ -111,13 +120,24 @@ void ChessBoard::Promote(int sqr, int p,int friendly)
 
 int ChessBoard::ChangeBoard(int start, int end)
 {   
+    half_move++;
+    if(board[end]!=0)
+    {
+        half_move=0;
+    }
+    if(abs(board[start])==WHITE*PAWN)
+    {
+        half_move=0;
+    }
     int val=0;
     if(board[start]==WHITE * PAWN && end<=7 && end>=0)
     {
+        
         val=1;
     }
     if(board[start]==BLACK * PAWN && end<=63 && end>=56)
     {
+    
         val=-1;
     }
     if(board[start] == WHITE * KING)
@@ -669,7 +689,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
         if(board[*move_it] == friendly * PAWN && board[*(move_it + 1)] == -friendly * EN_PASSANT_SQ){
             vector<int> temp_board = board;
 
-            ChessBoard temp(temp_board);
+            ChessBoard temp(temp_board,half_move);
 
             temp.edges = edges;
 
@@ -1080,66 +1100,3 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
 }
 
 
-int main(){
-
-    vector<int> board = {-7, -4, -3, -5, -1, -3, -4, -6, -2, -2, -2, -2, 0, -2, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 6, 4, 3, 5, 1, 3, 4, 7};
-
-
-    for(int i = 0; i < 64; i++){
-        board[i] = 0;
-        //if(i == 26)
-        //    board[i] = -1;
-        //else if(i == 36 || i == 27 || i == 31)
-        //    board[i] = 2;
-        //else if(i == 27)
-        //    board[i] = 2;
-        //else if(i == 24)
-        //    board[i] = -5;
-        //else if(i == 51)
-        //    board[i] = -5;
-        //else if(i == 45)
-        //    board[i] = -4;
-        //else if(i == 44)
-        //   board[i] = -5;
-        //else if(i == 51)
-        //    board[i] = 3;
-        //else if(i == 18)
-        //    board[i] = -9;
-        //else if(i == 23)
-        //    board[i] = 6;
-        if(i == 11)
-            board[i] = BLACK * PAWN;
-        if(i == 3)
-            board[i] = BLACK * KING;
-
-        if(i == 24)
-            board[i] = WHITE * KING;
-        else if(i == 26)
-            board[i] = WHITE * PAWN;
-        //else if(i == 31)
-        //    board[i] = WHITE * QUEEN; 
-        //else if(i == 31)
-        //    board[i] = BLACK * ROOK;
-        //else if(i == 31)
-        //    board[i] = -6; 
-
-        if(i % 8 == 0)
-            cout<<endl;
-        
-        cout<<setw(3)<<board[i];
-    }
-
-
-    cout<<endl<<endl;
-    ChessBoard b(board);
-
-    b.getEdgeDistance();
-    b.genMovesForEachPiece(BLACK);
-
-
-    cout<<"possible moves: "<<endl;
-    for(int i = 0; i < b.legalMoves.size(); i++){
-        cout<<b.legalMoves[i][0]<<", "<<b.legalMoves[i][1]<<endl;
-    }
-
-}
