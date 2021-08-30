@@ -310,6 +310,12 @@ int ChessBoard::IsCheck(int friendly)
             {
                 break;
             }
+            if(board[newpos]==-friendly*KING && j==1)
+            {
+                check++;
+                check_piece_pos = newpos;
+                break;  
+            }
             if (board[newpos] == -friendly * ROOK || board[newpos] == -friendly * ROOK_CASTLE || board[newpos] == -friendly * QUEEN)
             {
                 check++;
@@ -359,9 +365,16 @@ int ChessBoard::IsCheck(int friendly)
                 break;
 
             }
+            
             if (board[newpos] * friendly > 0 && board[newpos]*friendly!=EN_PASSANT_SQ)
             {
                 break;
+            }
+            if(board[newpos]==-friendly*KING && j==1)
+            {
+                check++;
+                check_piece_pos = newpos;
+                break;  
             }
             if (board[newpos] == -friendly * ROOK || board[newpos] == -friendly * ROOK_CASTLE || board[newpos]==-friendly*KNIGHT)
             {

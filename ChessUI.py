@@ -239,7 +239,7 @@ def main():
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
   
     #creates the board object
-    board=ChessBoard(chess_board.flatten())
+    board=ChessBoard(chess_board.flatten(),half_move)
     board.getEdgeDistance()
 
     moveset=extractlist(list(board.genMovesForEachPiece(plr)))

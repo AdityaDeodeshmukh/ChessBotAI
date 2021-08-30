@@ -79,4 +79,3 @@ def fen_code_parser(fen_code):
 
 
     
-    return chess_board,plr,half_move,full_move
