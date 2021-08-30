@@ -291,7 +291,7 @@ def main():
                                     prom_sqr=move[1]
                                 chess_board=list(board.board)
                                 chess_board=np.reshape(chess_board,(8,8))
-                                
+                                print(board.IsCheck(-plr))
                                 if(prom==0):
                                     plr=-plr
                                     moveset=extractlist(list(board.genMovesForEachPiece(plr)))

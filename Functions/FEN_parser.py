@@ -1,5 +1,6 @@
 
 import numpy as np
+from numpy.core.numeric import full
 def fen_code_parser(fen_code):
     x=0
     half_move=0
@@ -74,7 +75,7 @@ def fen_code_parser(fen_code):
             if char==" ":
                 x=x+1
                 continue
-
+    return chess_board,plr,half_move,full_move;            
 
 
 

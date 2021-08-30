@@ -306,7 +306,7 @@ int ChessBoard::IsCheck(int friendly)
             {
                 break;
             }
-            if (board[newpos] == -KNIGHT * friendly || board[newpos] == -PAWN * friendly || board[newpos] == -BISHOP * friendly || board[newpos] == -KING * friendly)
+            if (board[newpos] == -KNIGHT * friendly || board[newpos] == -PAWN * friendly || board[newpos] == -BISHOP * friendly || (board[newpos] == -KING * friendly&&j!=1))
             {
                 break;
             }
@@ -376,7 +376,7 @@ int ChessBoard::IsCheck(int friendly)
                 check_piece_pos = newpos;
                 break;  
             }
-            if (board[newpos] == -friendly * ROOK || board[newpos] == -friendly * ROOK_CASTLE || board[newpos]==-friendly*KNIGHT)
+            if (board[newpos] == -friendly * ROOK || board[newpos] == -friendly * ROOK_CASTLE || board[newpos]==-friendly*KNIGHT || (board[newpos]==-friendly*KING && j!=1))
             {
                 break;
             }
