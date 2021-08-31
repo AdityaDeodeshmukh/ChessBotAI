@@ -99,6 +99,7 @@ class ChessBoard{
         void makeLegal(int friendly, int checks, int kingpos);
 
         int getPieceDirection(int kingpos, int piece_pos = 64);
+        void CountNodes();
 
         
 };
@@ -1111,5 +1112,6 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
         move.pop_back();
     }
 }
+
 
 
