@@ -340,6 +340,7 @@ def main():
                     drag=False
                     if(checkInside(locinitial,PROM_START,(PROM_START[0]+80,PROM_START[1]+80)) and checkInside(locfinal,PROM_START,(PROM_START[0]+80,PROM_START[1]+80))):
                         board.Promote(prom_sqr,0,prom)
+                        MOVE_SOUND.play()
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         plr=-plr
@@ -349,6 +350,7 @@ def main():
                         
                     elif(checkInside(locinitial,(PROM_START[0]+80,PROM_START[1]),(PROM_START[0]+160,PROM_START[1]+80)) and checkInside(locfinal,(PROM_START[0]+80,PROM_START[1]),(PROM_START[0]+160,PROM_START[1]+80))):
                         board.Promote(prom_sqr,2,prom)
+                        MOVE_SOUND.play()
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         plr=-plr
@@ -357,6 +359,7 @@ def main():
                         prom_sqr=(65,65)
                     elif(checkInside(locinitial,(PROM_START[0],PROM_START[1]+80),(PROM_START[0]+80,PROM_START[1]+160)) and checkInside(locfinal,(PROM_START[0],PROM_START[1]+80),(PROM_START[0]+80,PROM_START[1]+160))):
                         board.Promote(prom_sqr,1,prom)
+                        MOVE_SOUND.play()
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         plr=-plr
@@ -365,6 +368,7 @@ def main():
                         prom_sqr=(65,65)
                     elif(checkInside(locinitial,(PROM_START[0]+80,PROM_START[1]+80),(PROM_START[0]+160,PROM_START[1]+160)) and checkInside(locfinal,(PROM_START[0]+80,PROM_START[1]+80),(PROM_START[0]+160,PROM_START[1]+160))):
                         board.Promote(prom_sqr,3,prom)
+                        MOVE_SOUND.play()
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         plr=-plr
