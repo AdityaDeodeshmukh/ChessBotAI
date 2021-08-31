@@ -639,7 +639,10 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
                 for(int start = 0; start < edges[piece_pos][opp_dir]; start++){
                     new_pos += direction_offsets[opp_dir];
 
-                    if(board[new_pos] != EMPTY_SQ && new_pos != kingpos){
+                    if(new_pos == kingpos)
+                        break;
+                    
+                    if(board[new_pos] != EMPTY_SQ){
                         confine_direction = false;
                         break;
                     }
