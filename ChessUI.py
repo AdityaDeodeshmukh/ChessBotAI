@@ -6,10 +6,11 @@ from Functions.CompileC import CompileClass
 import time
 from pygame.locals import *
 import cppyy
+from pygame import mixer
 CompileClass()
 from cppyy.gbl import ChessBoard
 pygame.init()
-pygame.mixer.quit()
+mixer.init()
 pygame.font.init()
 WHITE=(255,255,255)
 BLACK=(0,0,0)
@@ -31,7 +32,8 @@ WIDTH,HEIGHT=1280,720
 BOARD_SIZE=(640,640)
 PEICE_SIZE=(int(BOARD_SIZE[0]/8),int(BOARD_SIZE[1]/8))
 START_BOARD=(320,40)
-
+CAPTURE_SOUND=mixer.Sound(os.path.join('Assets','Capture.wav'))
+MOVE_SOUND=mixer.Sound(os.path.join('Assets','Move.wav'))
 WIN=pygame.display.set_mode((WIDTH,HEIGHT))
 FPS=60
 QUIT_START=(1040,635)
@@ -306,13 +308,22 @@ def main():
                         if sqrFin[0]!=65 and sqrFin!=65 and sqrIn[0]!=65 and sqrIn[1]!=65:
                             move=[sqrIn[0]+sqrIn[1]*8,sqrFin[0]+sqrFin[1]*8]
                             if move in moveset:
-                                prom=board.ChangeBoard(move[0],move[1])
                                 
+                                capture=False
+                                if(board.board[move[1]]!=0):
+                                    capture=True
+                                    if(abs(board.board[move[1]])==9 and abs(board.board[move[0]])!=2):
+                                        capture=False
+                                prom=board.ChangeBoard(move[0],move[1])
                                 if(prom!=0):
                                     prom_sqr=move[1]
                                 chess_board=list(board.board)
                                 chess_board=np.reshape(chess_board,(8,8))
-                                print(board.IsCheck(-plr))
+                                if(capture):
+                                    CAPTURE_SOUND.play()
+                                else:
+                                    MOVE_SOUND.play()
+
                                 if(prom==0):
                                     plr=-plr
                                     moveset=extractlist(list(board.genMovesForEachPiece(plr)))
