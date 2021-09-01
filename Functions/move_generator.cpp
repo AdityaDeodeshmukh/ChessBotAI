@@ -38,8 +38,20 @@ using namespace std;
 
 
 class ChessBoard{
+    
     public:
-
+    class node
+    {
+        public:
+        unsigned long HashVal;
+        float Eval;
+        float alpha;
+        float beta;
+        node * next;
+    };
+        static const unsigned long c=65536;
+        
+        node nd[c];
         vector<int> board;
 
         vector<vector<int>> legalMoves;
@@ -100,6 +112,7 @@ class ChessBoard{
 
         int getPieceDirection(int kingpos, int piece_pos = 64);
         void CountNodes();
+        int TestHash();
 
         
 };
@@ -1115,6 +1128,15 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
         move.pop_back();
     }
 }
-
+int ChessBoard:: TestHash()
+{
+    node *temp=new node();
+    temp->HashVal=7;
+    nd[0].next=temp;
+    nd[c-1].HashVal=1;
+    nd[0].HashVal=5;
+    int x=nd[0].next->HashVal;
+    return(x);
+}
 
 

@@ -9,9 +9,11 @@ import cppyy
 from pygame import mixer
 CompileClass()
 from cppyy.gbl import ChessBoard
+
 pygame.init()
 mixer.init()
 pygame.font.init()
+
 WHITE=(255,255,255)
 BLACK=(0,0,0)
 PLAYER_FONT=pygame.font.SysFont('Inter',25)
@@ -260,11 +262,18 @@ def main():
     drag=False
     FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
-  
+    print('hi')
     #creates the board object
     board=ChessBoard(chess_board.flatten(),half_move)
     board.getEdgeDistance()
-
+    strt=time.time()
+    print(board.TestHash())
+    end=time.time()-strt
+    print(end)
+    strt=time.time()
+    print(board.TestHash())
+    end=time.time()-strt
+    print(end)
     moveset=extractlist(list(board.genMovesForEachPiece(plr)))
     run=True
     peice=0
