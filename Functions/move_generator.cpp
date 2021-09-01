@@ -49,9 +49,9 @@ class ChessBoard{
         float beta;
         node * next;
     };
-        static const unsigned long c=65536;
+        static const unsigned long c=4194304;
         
-        node nd[c];
+        node** nd = new node*[c];
         vector<int> board;
 
         vector<vector<int>> legalMoves;
@@ -1131,11 +1131,16 @@ void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
 int ChessBoard:: TestHash()
 {
     node *temp=new node();
+    node *temp1=new node();
+    node *temp2=new node();
+    nd[0]=temp1;
+    nd[c-1]=temp2;
+    
     temp->HashVal=7;
-    nd[0].next=temp;
-    nd[c-1].HashVal=1;
-    nd[0].HashVal=5;
-    int x=nd[0].next->HashVal;
+    nd[0]->next=temp;
+    nd[c-1]->HashVal=1;
+    nd[0]->HashVal=5;
+    int x=nd[0]->next->HashVal-nd[c-1]->HashVal+nd[0]->HashVal;
     return(x);
 }
 
