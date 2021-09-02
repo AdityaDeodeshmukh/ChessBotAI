@@ -1144,4 +1144,48 @@ int ChessBoard:: TestHash()
     return(x);
 }
 
+long long evaluate(int depth, ChessBoard &base_board, int plr){
 
+    if(depth == 0)
+        return 1;
+    
+
+    long long move_count = 0;
+
+    vector<vector<int>> moves = base_board.genMovesForEachPiece(plr);
+
+    for(int i = 0; i < moves.size(); i++){
+        //ChessBoard new_board = base_board;
+        
+        //int captured = moves[i][1];
+        //int captured_piece = base_board.board[captured];
+
+        vector<int> temp_board = base_board.board;
+
+        base_board.ChangeBoard(moves[i][0], moves[i][1]);
+
+        move_count += evaluate(depth - 1, base_board, -plr);
+
+        /*if(depth == 2){
+            cout<<"After changing "<<moves[i][0]<<", "<<moves[i][1]<<": ";
+            cout<<move_count<<endl;
+        }*/
+
+        base_board.board = temp_board;
+        
+    }
+    vector<vector<int>>().swap(moves);
+    
+    //printing for debugging
+    /*if(depth == 4){
+        for(int i = 0; i < 64; i++){
+        if(i % 8 == 0)
+            cout<<endl;
+        
+        cout<<setw(3)<<base_board.board[i];
+        }
+        cout<<endl;
+    }*/
+
+    return move_count;
+}
