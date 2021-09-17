@@ -49,7 +49,7 @@ class ChessBoard{
         float beta;
         node * next;
     };
-        static const unsigned long c=4194304;
+        static const unsigned long c=65535;
         
         node** nd = new node*[c];
         vector<int> board;
@@ -96,27 +96,27 @@ class ChessBoard{
         
         void getEdgeDistance();
 
-        vector<vector<int>> genMovesForEachPiece(int friendly);
+        vector<vector<int>> genMovesForEachPiece(int &friendly);
 
-        void genMoves(int start_pos, int friendly, int checks);
+        void genMoves(int &start_pos, int &friendly, int &checks);
 
-        void checkCastle(int start_pos, vector<int> &move, int friendly);
+        void checkCastle(int &start_pos, vector<int> &move, int &friendly);
 
-        int IsCheck(int friendly);
+        int IsCheck(int &friendly);
 
-        int ChangeBoard(int start,int end);
+        int ChangeBoard(int &start,int &end);
         
-        void Promote(int sqr,int p,int friendly);
+        void Promote(int &sqr,int &p,int &friendly);
 
-        void makeLegal(int friendly, int checks, int kingpos);
+        void makeLegal(int &friendly, int &checks, int &kingpos);
 
-        int getPieceDirection(int kingpos, int piece_pos = 64);
+        int getPieceDirection(int &kingpos, int piece_pos = 64);
         void CountNodes();
         int TestHash();
 
         
 };
-void ChessBoard::Promote(int sqr, int p,int friendly)
+void ChessBoard::Promote(int &sqr, int &p, int &friendly)
 {
     if (p == 0){
         board[sqr] = friendly * QUEEN;
@@ -132,7 +132,7 @@ void ChessBoard::Promote(int sqr, int p,int friendly)
     }
 }
 
-int ChessBoard::ChangeBoard(int start, int end)
+int ChessBoard::ChangeBoard(int &start, int &end)
 {   
     half_move++;
     if(board[end]!=0)
@@ -276,7 +276,7 @@ int ChessBoard::ChangeBoard(int start, int end)
 }
 
 
-int ChessBoard::IsCheck(int friendly)
+int ChessBoard::IsCheck(int &friendly)
 {
 
     int kingpos;
@@ -486,7 +486,7 @@ void ChessBoard::getEdgeDistance(){
 }
 
 //generates moves for each friendly piece, that is, the for the pieces whose turn it is currently
-vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
+vector<vector<int>> ChessBoard::genMovesForEachPiece(int &friendly){
     legalMoves.clear();
     move_count = 0;
     
@@ -525,7 +525,7 @@ vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
 }
 
 
-void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
+void ChessBoard::makeLegal(int &friendly, int &checks, int &kingpos){
     
     auto legalMoves_it = legalMoves.begin();
 
@@ -576,7 +576,11 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
 
                 if(pos == legal_squares.end()){
 
-                    if(board[*move_it] != friendly * PAWN || *(move_it + 1) != (check_piece_pos - (8 * friendly))){
+                    if(board[*move_it] == friendly * PAWN && board[check_piece_pos] == -friendly * PAWN && *(move_it + 1) == (check_piece_pos - (8 * friendly))){
+                        legalMoves_it++;
+                        continue;
+                    }
+                    else{
                         legalMoves.erase(legalMoves_it);
                         continue;
                     }
@@ -663,7 +667,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
 
                 if(confine_direction == false){
                     legalMoves_it++;
-                    break;
+                    continue;
                 }
 
                 for(int pos = kingpos + direction_offsets[piece_dir]; pos != enemy_pos; pos += direction_offsets[piece_dir]){
@@ -732,17 +736,17 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
                 continue;
             }
 
-            /*else{
+            else{
                 legalMoves_it++;
-            }*/
+            }
         }
 
 
-        if(board[*move_it] == friendly * PAWN && ((*(move_it + 1) >= 0 && *(move_it + 1) <= 7) || (*(move_it + 1) >= 56 && *(move_it + 1) <= 63))){
+        /*if(board[*move_it] == friendly * PAWN && ((*(move_it + 1) >= 0 && *(move_it + 1) <= 7) || (*(move_it + 1) >= 56 && *(move_it + 1) <= 63))){
             move_count += 3;
-        }
+        }*/
         
-        if(*move_it != kingpos /*&& kmoves_found == false*/){
+        else if(*move_it != kingpos /*&& kmoves_found == false*/){
             legalMoves_it++;
             continue;
         }
@@ -794,7 +798,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
                 erased = true;
             }
 
-            if(friendly == 1)
+            if(friendly == WHITE)
                 wking_pos = old_kpos;
             else
                 bking_pos = old_kpos;
@@ -807,7 +811,7 @@ void ChessBoard::makeLegal(int friendly, int checks, int kingpos){
     move_count += legalMoves.size();
 }
 
-int ChessBoard::getPieceDirection(int kingpos, int piece_pos){
+int ChessBoard::getPieceDirection(int &kingpos, int piece_pos){
 
     bool check = false;
 
@@ -819,20 +823,26 @@ int ChessBoard::getPieceDirection(int kingpos, int piece_pos){
     if(abs(board[piece_pos]) == KNIGHT && check == true)
         return -1;
     
+    int row_kingpos = kingpos / 8;
+    int col_kingpos = kingpos % 8;
+
+    int row_piecepos = piece_pos / 8;
+    int col_piecepos = piece_pos % 8;
+
     int diff = kingpos - piece_pos;
     if(diff < 0){
-        if(diff % 9 == 0){
+        if(row_kingpos - row_piecepos == col_kingpos - col_piecepos){
             return SE;
         }
-        else if(diff % 8 == 0){
+        else if(col_kingpos == col_piecepos){
             return S;
         }
 
-        else if(diff % 7 == 0){
+        else if(row_kingpos - row_piecepos == -(col_kingpos - col_piecepos)){
             return SW;
         }
 
-        else if(kingpos / 8 == piece_pos / 8)
+        else if(row_kingpos == row_piecepos)
             return E;
         
         else
@@ -840,18 +850,18 @@ int ChessBoard::getPieceDirection(int kingpos, int piece_pos){
     }
 
     else{
-        if(diff % 9 == 0){
+        if(row_kingpos - row_piecepos == col_kingpos - col_piecepos){
             return NW;
         }
-        else if(diff % 8 == 0){
+        else if(col_kingpos == col_piecepos){
             return N;
         }
 
-        else if(diff % 7 == 0){
+        else if(row_kingpos - row_piecepos == -(col_kingpos - col_piecepos)){
             return NE;
         }
 
-        else if(kingpos / 8 == piece_pos / 8)
+        else if(row_kingpos == row_piecepos)
             return W;
 
         else 
@@ -860,7 +870,7 @@ int ChessBoard::getPieceDirection(int kingpos, int piece_pos){
 }
 
 //generates moves for a given piece and returns a vector of move positions for that piece
-void ChessBoard::genMoves(int start_pos, int friendly, int checks){
+void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
     int start_dir;
     int end_dir;
     int move_limit = 99;
@@ -1073,7 +1083,7 @@ void ChessBoard::genMoves(int start_pos, int friendly, int checks){
 }
 
 
-void ChessBoard::checkCastle(int start_pos, vector<int> &move, int friendly){
+void ChessBoard::checkCastle(int &start_pos, vector<int> &move, int &friendly){
     //checking if castling is possible
     int low_lim, up_lim;
     if(friendly == WHITE){
@@ -1144,33 +1154,41 @@ int ChessBoard:: TestHash()
     return(x);
 }
 
-long long evaluate(int depth, ChessBoard &base_board, int plr){
+long long evaluate(int depth, ChessBoard &base_board, int &plr){
+    vector<vector<int>> moves;
 
+    try{
     if(depth == 0)
         return 1;
     
 
     long long move_count = 0;
 
-    vector<vector<int>> moves = base_board.genMovesForEachPiece(plr);
+    moves = base_board.genMovesForEachPiece(plr);
     vector<int> temp_board = base_board.board;
     int w_king=base_board.wking_pos;
     int b_king=base_board.bking_pos;
     int en_pessant=base_board.En_pessant_pos;
     int half_move=base_board.half_move;
+    //int check_piece = base_board.check_piece_pos;
     for(int i = 0; i < moves.size(); i++){
         //ChessBoard new_board = base_board;
         
         //int captured = moves[i][1];
         //int captured_piece = base_board.board[captured];
 
-        
+        if(depth == 6){
+            cout<<moves[i][0]<<", "<<moves[i][1]<<": \n";
+        }
 
         base_board.ChangeBoard(moves[i][0], moves[i][1]);
+        
+        plr = -plr;
 
-        move_count += evaluate(depth - 1, base_board, -plr);
-
-        /*if(depth == 2){
+        move_count += evaluate(depth - 1, base_board, plr);
+        
+        plr = -plr;
+        /*if(depth == 6){
             cout<<"After changing "<<moves[i][0]<<", "<<moves[i][1]<<": ";
             cout<<move_count<<endl;
         }*/
@@ -1180,19 +1198,40 @@ long long evaluate(int depth, ChessBoard &base_board, int plr){
         base_board.bking_pos=b_king;
         base_board.En_pessant_pos=en_pessant;
         base_board.half_move=half_move;
+        //base_board.check_piece_pos = check_piece;
     }
-    vector<vector<int>>().swap(moves);
+    
     
     //printing for debugging
-    /*if(depth == 4){
+    if(depth == 5){
+        
+        /*for(int i = 0; i < 64; i++){
+            if(i % 8 == 0)
+                cout<<endl;
+            
+            cout<<setw(3)<<base_board.board[i];
+        }
+        cout<<endl;*/
+
+        cout<<move_count<<endl;
+    }
+
+    return move_count;
+    }
+    catch(...){
         for(int i = 0; i < 64; i++){
         if(i % 8 == 0)
             cout<<endl;
         
-        cout<<setw(3)<<base_board.board[i];
-        }
-        cout<<endl;
-    }*/
-
-    return move_count;
+        cout<<setw(3)<<base_board.board[i]<<",";
+    }
+    cout<<endl;
+    cout<<"player: "<<plr<<endl;
+    for(int i = 0; i < base_board.legalMoves.size(); i++){
+        cout<<base_board.legalMoves[i][0]<<", "<<base_board.legalMoves[i][1]<<endl;
+    }
+    cout<<endl;
+    cout<<base_board.En_pessant_pos;
+    exit(0);
+    }
 }
