@@ -96,7 +96,7 @@ class ChessBoard{
         
         void getEdgeDistance();
 
-        vector<vector<int>> genMovesForEachPiece(int &friendly);
+        vector<vector<int>> genMovesForEachPiece(int friendly);
 
         void genMoves(int &start_pos, int &friendly, int &checks);
 
@@ -104,9 +104,9 @@ class ChessBoard{
 
         int IsCheck(int &friendly);
 
-        int ChangeBoard(int &start,int &end);
+        int ChangeBoard(int start,int end);
         
-        void Promote(int &sqr,int &p,int &friendly);
+        void Promote(int sqr,int p,int friendly);
 
         void makeLegal(int &friendly, int &checks, int &kingpos);
 
@@ -116,7 +116,7 @@ class ChessBoard{
 
         
 };
-void ChessBoard::Promote(int &sqr, int &p, int &friendly)
+void ChessBoard::Promote(int sqr, int p, int friendly)
 {
     if (p == 0){
         board[sqr] = friendly * QUEEN;
@@ -132,7 +132,7 @@ void ChessBoard::Promote(int &sqr, int &p, int &friendly)
     }
 }
 
-int ChessBoard::ChangeBoard(int &start, int &end)
+int ChessBoard::ChangeBoard(int start, int end)
 {   
     half_move++;
     if(board[end]!=0)
@@ -486,7 +486,7 @@ void ChessBoard::getEdgeDistance(){
 }
 
 //generates moves for each friendly piece, that is, the for the pieces whose turn it is currently
-vector<vector<int>> ChessBoard::genMovesForEachPiece(int &friendly){
+vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
     legalMoves.clear();
     move_count = 0;
     
