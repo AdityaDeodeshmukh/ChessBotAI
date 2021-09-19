@@ -81,6 +81,9 @@ BOT_IMG=pygame.image.load(os.path.join('Assets','Bot.png')).convert_alpha()
 
 PLAYER_IMG=pygame.image.load(os.path.join('Assets','Player.png')).convert_alpha()
 
+MOVE_SHADOW=pygame.image.load(os.path.join('Assets','Move_Chess.png')).convert_alpha()
+
+CAPTURE_SHADOW=pygame.image.load(os.path.join('Assets','Capture_Chess.png')).convert_alpha()
 DEV1_IMG=pygame.image.load(os.path.join('Assets','Dev1.png')).convert_alpha()
 DEV1_IMG=pygame.transform.scale(DEV1_IMG,(40,40))
 DEV2_IMG=pygame.image.load(os.path.join('Assets','Dev2.png')).convert_alpha()
@@ -225,15 +228,18 @@ def draw_promote(prom):
         WIN.blit(B_KNIGHT,(PROM_START[0],PROM_START[1]+80))
         WIN.blit(B_BISHOP,(PROM_START[0]+80,PROM_START[1]))
         WIN.blit(B_ROOK,(PROM_START[0]+80,PROM_START[1]+80))
-def draw_main(chess_board,locfinal,locinitial,peice,player,prom):
+def draw_main(chess_board,locfinal,locinitial,peice,player,prom,moveset):
     WIN.blit(BACKGROUND,(0,0))
     WIN.blit(BOARD,START_BOARD)
+    if(peice!=0):
+        draw_moves(chess_board,locfinal,locinitial,peice,player,moveset)
     #pygame.draw.rect(WIN,BG2,UPPER_BOARD)
     #pygame.draw.rect(WIN,BG2,LOWER_BOARD)
     pygame.draw.rect(WIN,WHITE,BOT_RECT,0,8)
     pygame.draw.rect(WIN,WHITE,PLAYER_RECT,0,8)
     #pygame.draw.rect(WIN,(116,150,85),PROMOTE_RECT)
     pygame.draw.rect(WIN,(235, 87, 87),QUIT_RECT,0,8)
+    
     WIN.blit(PROMOTE_REGION,PROM_START)
     WIN.blit(engine_text,(112,63))
     WIN.blit(player_text,(112,638))
@@ -252,6 +258,33 @@ def draw_main(chess_board,locfinal,locinitial,peice,player,prom):
     if prom!=0:
         draw_promote(prom)
     pygame.display.update()
+def draw_moves(chess_board,locfinal,locinitial,peice,player,moveset):
+    sqrIn=getsquare(locinitial,player)
+    x=sqrIn[0]
+    y=sqrIn[1]
+    for i in moveset:
+        if i[0]==x+y*8:
+            end=i[1]
+            row=end//8
+            col=end%8
+            if(chess_board[row][col]!=0 and abs(chess_board[row][col])!=9):
+                if(player==-1):
+                    row=7-row
+                    col=7-col
+                WIN.blit(CAPTURE_SHADOW,(START_BOARD[0]+col*(PEICE_SIZE[0]),START_BOARD[1]+row*(PEICE_SIZE[0])))
+                continue
+            if(abs(chess_board[row][col])==9 and abs(peice)==2):
+                if(player==-1):
+                    row=7-row
+                    col=7-col
+                WIN.blit(CAPTURE_SHADOW,(START_BOARD[0]+col*(PEICE_SIZE[0]),START_BOARD[1]+row*(PEICE_SIZE[0])))
+                continue
+
+            if(player==-1):
+                row=7-row
+                col=7-col
+            WIN.blit(MOVE_SHADOW,(START_BOARD[0]+col*(PEICE_SIZE[0]),START_BOARD[1]+row*(PEICE_SIZE[0])))
+
 def checkpeice():
     pass
 #The main body of the game
@@ -336,6 +369,8 @@ def main():
                                 if(prom==0):
                                     plr=-plr
                                     moveset=extractlist(list(board.genMovesForEachPiece(plr)))
+                                    print(moveset)
+                                    print(move)
                                     
                         peice=0
             if(event.type==pygame.MOUSEBUTTONDOWN and prom!=0):
@@ -390,7 +425,7 @@ def main():
         if drag==True:
             locfinal=pygame.mouse.get_pos()
         
-        draw_main(chess_board,locfinal,locinitial,peice,player,prom)            
+        draw_main(chess_board,locfinal,locinitial,peice,player,prom,moveset)            
         
 
     pygame.quit()
