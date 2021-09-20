@@ -295,18 +295,9 @@ def main():
     drag=False
     FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
-    print('hi')
     #creates the board object
     board=ChessBoard(chess_board.flatten(),half_move)
     board.getEdgeDistance()
-    strt=time.time()
-    print(board.TestHash())
-    end=time.time()-strt
-    print(end)
-    strt=time.time()
-    print(board.TestHash())
-    end=time.time()-strt
-    print(end)
     moveset=extractlist(list(board.genMovesForEachPiece(plr)))
     run=True
     peice=0
@@ -369,8 +360,7 @@ def main():
                                 if(prom==0):
                                     plr=-plr
                                     moveset=extractlist(list(board.genMovesForEachPiece(plr)))
-                                    print(moveset)
-                                    print(move)
+                                    
                                     
                         peice=0
             if(event.type==pygame.MOUSEBUTTONDOWN and prom!=0):
