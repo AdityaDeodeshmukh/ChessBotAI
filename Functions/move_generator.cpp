@@ -61,6 +61,10 @@ class ChessBoard{
         vector<vector<int>> edges;
 
         const vector<int> direction_offsets = {8, 1, -8, -1, 9, -7, -9, 7};
+
+        vector<int> whitepieces;
+        vector<int> blackpieces;
+
         int En_pessant_pos;
 
         int bking_pos;
@@ -78,10 +82,19 @@ class ChessBoard{
             this->board = board;
             En_pessant_pos=64;
             for(int pos = 0; pos < board.size(); pos++){
+                if(board[pos] > 0 && abs(board[pos]) != EN_PASSANT_SQ){
+                    whitepieces.push_back(pos);
+                }
+
+                else if(board[pos] < 0 && abs(board[pos]) != EN_PASSANT_SQ){
+                    blackpieces.push_back(pos);
+                }
+
                 if(board[pos] == WHITE * KING)
                     wking_pos = pos;
                 else if(board[pos] == BLACK * KING)
                     bking_pos = pos;
+                
                 if(abs(board[pos]) == EN_PASSANT_SQ)
                     En_pessant_pos=pos;
             }
@@ -1158,80 +1171,212 @@ long long evaluate(int depth, ChessBoard &base_board, int &plr){
     vector<vector<int>> moves;
 
     try{
-    if(depth == 0)
-        return 1;
-    
-
-    long long move_count = 0;
-
-    moves = base_board.genMovesForEachPiece(plr);
-    vector<int> temp_board = base_board.board;
-    int w_king=base_board.wking_pos;
-    int b_king=base_board.bking_pos;
-    int en_pessant=base_board.En_pessant_pos;
-    int half_move=base_board.half_move;
-    //int check_piece = base_board.check_piece_pos;
-    for(int i = 0; i < moves.size(); i++){
-        //ChessBoard new_board = base_board;
+        if(depth == 0)
+            return 1;
         
-        //int captured = moves[i][1];
-        //int captured_piece = base_board.board[captured];
 
-        if(depth == 6){
-            cout<<moves[i][0]<<", "<<moves[i][1]<<": \n";
-        }
+        long long move_count = 0;
 
-        base_board.ChangeBoard(moves[i][0], moves[i][1]);
-        
-        plr = -plr;
-
-        move_count += evaluate(depth - 1, base_board, plr);
-        
-        plr = -plr;
-        /*if(depth == 6){
-            cout<<"After changing "<<moves[i][0]<<", "<<moves[i][1]<<": ";
-            cout<<move_count<<endl;
-        }*/
-
-        base_board.board = temp_board;
-        base_board.wking_pos=w_king;
-        base_board.bking_pos=b_king;
-        base_board.En_pessant_pos=en_pessant;
-        base_board.half_move=half_move;
-        //base_board.check_piece_pos = check_piece;
-    }
-    
-    
-    //printing for debugging
-    if(depth == 5){
-        
-        /*for(int i = 0; i < 64; i++){
-            if(i % 8 == 0)
-                cout<<endl;
+        moves = base_board.genMovesForEachPiece(plr);
+        vector<int> temp_board = base_board.board;
+        int w_king=base_board.wking_pos;
+        int b_king=base_board.bking_pos;
+        int en_pessant=base_board.En_pessant_pos;
+        int half_move=base_board.half_move;
+        //int check_piece = base_board.check_piece_pos;
+        for(int i = 0; i < moves.size(); i++){
+            //ChessBoard new_board = base_board;
             
-            cout<<setw(3)<<base_board.board[i];
+            //int captured = moves[i][1];
+            //int captured_piece = base_board.board[captured];
+
+            /*if(depth == 5){
+                cout<<moves[i][0]<<", "<<moves[i][1]<<": \n";
+            }*/
+
+            base_board.ChangeBoard(moves[i][0], moves[i][1]);
+            
+            plr = -plr;
+
+            move_count += evaluate(depth - 1, base_board, plr);
+            
+            plr = -plr;
+            /*if(depth == 6){
+                cout<<"After changing "<<moves[i][0]<<", "<<moves[i][1]<<": ";
+                cout<<move_count<<endl;
+            }*/
+
+            base_board.board = temp_board;
+            base_board.wking_pos=w_king;
+            base_board.bking_pos=b_king;
+            base_board.En_pessant_pos=en_pessant;
+            base_board.half_move=half_move;
+            //base_board.check_piece_pos = check_piece;
         }
-        cout<<endl;*/
+        
+        
+        //printing for debugging
+        if(depth == 5){
+            
+            /*for(int i = 0; i < 64; i++){
+                if(i % 8 == 0)
+                    cout<<endl;
+                
+                cout<<setw(3)<<base_board.board[i];
+            }
+            cout<<endl;*/
 
-        cout<<move_count<<endl;
-    }
+            cout<<move_count<<endl;
+        }
 
-    return move_count;
+        return move_count;
     }
     catch(...){
         for(int i = 0; i < 64; i++){
-        if(i % 8 == 0)
-            cout<<endl;
+            if(i % 8 == 0)
+                cout<<endl;
+            
+            cout<<setw(3)<<base_board.board[i]<<",";
+        }
+
+        cout<<endl;
+        cout<<"player: "<<plr<<endl;
         
-        cout<<setw(3)<<base_board.board[i]<<",";
+        for(int i = 0; i < base_board.legalMoves.size(); i++){
+            cout<<base_board.legalMoves[i][0]<<", "<<base_board.legalMoves[i][1]<<endl;
+        }
+
+        cout<<endl;
+        cout<<base_board.En_pessant_pos;
+        exit(0);
     }
-    cout<<endl;
-    cout<<"player: "<<plr<<endl;
-    for(int i = 0; i < base_board.legalMoves.size(); i++){
-        cout<<base_board.legalMoves[i][0]<<", "<<base_board.legalMoves[i][1]<<endl;
+}
+
+int getBoardValue(ChessBoard &b, int &plr){
+    static const int values[] = {0, 0, 1, 3, 3, 9, 5, 5};
+    int totalvalue = 0;
+    
+    /*
+    for(auto it = b.whitepieces.begin(); it != b.whitepieces.end(); it++){
+        totalvalue += values[b.board[*it]];
     }
-    cout<<endl;
-    cout<<base_board.En_pessant_pos;
-    exit(0);
+
+    for(auto it = b.blackpieces.begin(); it != b.blackpieces.end(); it++){
+        totalvalue -= values[b.board[*it]];
+    }*/
+
+    for(int i = 0; i < 64; i++){
+        if(b.board[i] < 0 && abs(b.board[i]) != EN_PASSANT_SQ){
+            totalvalue -= values[abs(b.board[i])];
+        }
+        else if(b.board[i] > 0 && abs(b.board[i]) != EN_PASSANT_SQ){
+            totalvalue += values[b.board[i]];
+        }
+            
     }
+    return totalvalue ;
+}
+
+int minimax(ChessBoard &b, int &plr, int depth){
+    if(depth == 0){
+        return getBoardValue(b, plr);
+    }
+    
+    vector<vector<int>> moves;
+    moves = b.genMovesForEachPiece(plr);
+    vector<int> temp_board = b.board;
+    int w_king = b.wking_pos;
+    int b_king = b.bking_pos;
+    int en_pessant = b.En_pessant_pos;
+    int half_move = b.half_move;
+
+    int bestvalue = -99999;
+
+    for(int i = 0; i < moves.size(); i++){
+        b.ChangeBoard(moves[i][0], moves[i][1]);
+
+        plr = -plr;
+
+        int value = -minimax(b, plr, depth - 1);
+        
+        if(value > bestvalue){
+            bestvalue = value;
+        }
+        
+        plr = -plr;
+
+        b.board = temp_board;
+        b.wking_pos = w_king;
+        b.bking_pos = b_king;
+        b.En_pessant_pos = en_pessant;
+        b.half_move = half_move;
+    }
+
+    return bestvalue;
+}
+
+int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
+    if(depth == 0){
+        return getBoardValue(b, plr);
+    }
+    
+    vector<vector<int>> moves;
+    moves = b.genMovesForEachPiece(plr);
+    vector<int> temp_board = b.board;
+    int w_king = b.wking_pos;
+    int b_king = b.bking_pos;
+    int en_pessant = b.En_pessant_pos;
+    int half_move = b.half_move;
+
+    if(plr == WHITE){
+        int value = -99999;
+        for(int i = 0; i < moves.size(); i++){
+            b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            plr = -plr;
+
+            value = max(value, minimaxAlphaBeta(b, plr, depth - 1, alpha, beta));
+
+            plr = -plr;
+
+            b.board = temp_board;
+            b.wking_pos = w_king;
+            b.bking_pos = b_king;
+            b.En_pessant_pos = en_pessant;
+            b.half_move = half_move;
+
+            if(value >= beta)
+                break;
+            
+            alpha = max(alpha, value);
+        }
+
+        return value;
+    }
+
+    else{
+        int value = 99999;
+        for(int i = 0; i < moves.size(); i++){
+            b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            plr = -plr;
+
+            value = min(value, minimaxAlphaBeta(b, plr, depth - 1, alpha, beta));
+
+            plr = -plr;
+
+            b.board = temp_board;
+            b.wking_pos = w_king;
+            b.bking_pos = b_king;
+            b.En_pessant_pos = en_pessant;
+            b.half_move = half_move;
+
+            if(value <= alpha)
+                break;
+
+            beta = min(value, beta);
+        }
+        return value;
+    }
+
 }
