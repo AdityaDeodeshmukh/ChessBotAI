@@ -1663,7 +1663,7 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
     int half_move = b.half_move;
 
     if(plr == WHITE){
-        int value = -99999;
+        int value = -127;
         for(int i = 0; i < moves.size(); i++){
             b.ChangeBoard(moves[i][0], moves[i][1]);
 
@@ -1713,7 +1713,7 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
     }
 
     else{
-        int value = 99999;
+        int value = 127;
         for(int i = 0; i < moves.size(); i++){
             b.ChangeBoard(moves[i][0], moves[i][1]);
 
@@ -1770,9 +1770,17 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
     int beta=9999;
     int depth =5;
     int best_eval=-plr*9999;
+    int value=0;
     vector<vector<int>> moves=b.genMovesForEachPiece(plr);
     vector<vector<int>> mvscpy=moves;
-    int value=0;
+    if(plr==WHITE)
+    {
+        value=-127;
+    }
+    if(plr==BLACK)
+    {
+        value=127;
+    }
     vector<int>best_move;
     best_move.push_back(65);
     best_move.push_back(65);

@@ -307,7 +307,7 @@ def main():
     prom=0
     prom_sqr=(65,65)
     drag=False
-    FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    FEN="rnb2k1r/pp1Pbppp/2p5/q7/2B5/8/PPPQNnPP/RNB1K2R w KQ - 3 9"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
     #creates the board object
     
@@ -373,8 +373,6 @@ def main():
                                     MOVE_SOUND.play()
                                 if(prom==0):
                                     plr=-plr
-                                    
-                                    
                                     draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
                                     best_move=list(EvaluateBoard(board,-player))
                                     chess_board=list(board.board)
@@ -408,9 +406,22 @@ def main():
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         plr=-plr
-                        moveset=extractlist(list(board.genMovesForEachPiece(plr)))
-                        prom=0
+                        draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
+                        best_move=list(EvaluateBoard(board,-player))
+                        moves=extractlist(list(board.genMovesForEachPiece(-player)))
+                        print(moves)
+                        print(best_move)
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        board.ChangeBoard(best_move[0],best_move[1])
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        moveset=extractlist(list(board.genMovesForEachPiece(player)))
+                        plr=-plr
+                        peice=0
+                        prom=0;
                         prom_sqr=(65,65)
+                        continue;
                         
                     elif(checkInside(locinitial,(PROM_START[0]+80,PROM_START[1]),(PROM_START[0]+160,PROM_START[1]+80)) and checkInside(locfinal,(PROM_START[0]+80,PROM_START[1]),(PROM_START[0]+160,PROM_START[1]+80))):
                         board.Promote(prom_sqr,2,prom)
@@ -418,8 +429,20 @@ def main():
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         plr=-plr
-                        moveset=extractlist(list(board.genMovesForEachPiece(plr)))
-                        prom=0
+                        moves=extractlist(list(board.genMovesForEachPiece(-player)))
+                        print(moves)
+                        print(best_move)
+                        draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
+                        best_move=list(EvaluateBoard(board,-player))
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        board.ChangeBoard(best_move[0],best_move[1])
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        moveset=extractlist(list(board.genMovesForEachPiece(player)))
+                        plr=-plr
+                        peice=0
+                        prom=0;
                         prom_sqr=(65,65)
                     elif(checkInside(locinitial,(PROM_START[0],PROM_START[1]+80),(PROM_START[0]+80,PROM_START[1]+160)) and checkInside(locfinal,(PROM_START[0],PROM_START[1]+80),(PROM_START[0]+80,PROM_START[1]+160))):
                         board.Promote(prom_sqr,1,prom)
@@ -427,18 +450,44 @@ def main():
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         plr=-plr
-                        moveset=extractlist(list(board.genMovesForEachPiece(plr)))
-                        prom=0
+                        
+                        draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
+                        moves=extractlist(list(board.genMovesForEachPiece(-player)))
+                        print(moves)
+                        best_move=list(EvaluateBoard(board,-player))
+                        print(best_move)
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        board.ChangeBoard(best_move[0],best_move[1])
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        moveset=extractlist(list(board.genMovesForEachPiece(player)))
+                        plr=-plr
+                        peice=0
+                        prom=0;
                         prom_sqr=(65,65)
                     elif(checkInside(locinitial,(PROM_START[0]+80,PROM_START[1]+80),(PROM_START[0]+160,PROM_START[1]+160)) and checkInside(locfinal,(PROM_START[0]+80,PROM_START[1]+80),(PROM_START[0]+160,PROM_START[1]+160))):
                         board.Promote(prom_sqr,3,prom)
                         MOVE_SOUND.play()
+                        
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         plr=-plr
+                        draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
+                        best_move=list(EvaluateBoard(board,-player))
+                        moves=extractlist(list(board.genMovesForEachPiece(-player)))
+                        print(moves)
+                        print(best_move)
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        board.ChangeBoard(best_move[0],best_move[1])
+                        chess_board=list(board.board)
+                        chess_board=np.reshape(chess_board,(8,8))
+                        draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
                         moveset=extractlist(list(board.genMovesForEachPiece(player)))
-                        
-                        prom=0
+                        plr=-plr
+                        peice=0
+                        prom=0;
                         prom_sqr=(65,65)
                     
                     
