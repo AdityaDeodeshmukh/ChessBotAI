@@ -1,16 +1,24 @@
+
 import pygame
+
 import numpy as np
+
 import os
+
 from Functions.FEN_parser import fen_code_parser
+print("Hi");
 from Functions.CompileC import CompileClass
+
 import time
 from pygame.locals import *
+
 import cppyy
 from pygame import mixer
 CompileClass()
 from cppyy.gbl import ChessBoard
-
+from cppyy.gbl import evaluate
 pygame.init()
+
 mixer.init()
 pygame.font.init()
 

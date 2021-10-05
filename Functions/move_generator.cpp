@@ -6,8 +6,9 @@
 #include<algorithm>
 #include<iomanip>
 #include<chrono>
+#include<random>
 using namespace std;
-
+long countmoves;
 //defining direction macros
 
 #define S 0
@@ -43,13 +44,17 @@ class ChessBoard{
     class node
     {
         public:
-        unsigned long HashVal;
+        uint64_t HashVal;
         float Eval;
-        float alpha;
-        float beta;
+        int depth;
+        int move_num;
         node * next;
     };
-        static const unsigned long c=65535;
+        int move_num;
+        node* nd_arr[2]; 
+        uint64_t random_num[64][16];
+        uint64_t rand;
+        static const unsigned long c=65536;
         
         node** nd = new node*[c];
         vector<int> board;
@@ -78,9 +83,14 @@ class ChessBoard{
         ChessBoard(){};
 
         ChessBoard(vector<int> board,int half){
+            move_num=10;
             half_move=half;
             this->board = board;
             En_pessant_pos=64;
+            for(long s=0;s<c;s++)
+            {
+                nd[s]=NULL;
+            }
             for(int pos = 0; pos < board.size(); pos++){
                 if(board[pos] > 0 && abs(board[pos]) != EN_PASSANT_SQ){
                     whitepieces.push_back(pos);
@@ -98,6 +108,16 @@ class ChessBoard{
                 if(abs(board[pos]) == EN_PASSANT_SQ)
                     En_pessant_pos=pos;
             }
+            mt19937_64 gen (random_device{}());
+            for(int i=0;i<64;i++)
+            {
+                for(int j=0;j<16;j++)
+                {
+                    
+                    random_num[i][j]=gen();
+                }
+            }
+            rand=gen();
         }
         ChessBoard(const ChessBoard &old_board)
         {
@@ -120,9 +140,10 @@ class ChessBoard{
         int ChangeBoard(int start,int end);
         
         void Promote(int sqr,int p,int friendly);
-
+        uint64_t Gen_Zobrist_Key(int plr);
         void makeLegal(int &friendly, int &checks, int &kingpos);
-
+        node* create_node(int evaluation,int alpha,int beta,uint64_t hash,int depth,int move_num);
+        void search_node(uint64_t hash);
         int getPieceDirection(int &kingpos, int piece_pos = 64);
         void CountNodes();
         int TestHash();
@@ -291,7 +312,6 @@ int ChessBoard::ChangeBoard(int start, int end)
 
 int ChessBoard::IsCheck(int &friendly)
 {
-
     int kingpos;
     int check = 0;
     if (friendly == WHITE)
@@ -1166,6 +1186,107 @@ int ChessBoard:: TestHash()
     int x=nd[0]->next->HashVal-nd[c-1]->HashVal+nd[0]->HashVal;
     return(x);
 }
+uint64_t ChessBoard:: Gen_Zobrist_Key(int plr)
+{
+    uint64_t zobrist_key=0;
+    int piece=0;
+    for(int i=0;i<64;i++)
+    {
+        piece=board[i];
+        if(piece==0)
+            continue;
+        if(piece==1)
+            zobrist_key=zobrist_key^random_num[i][0];
+        if(piece==-1)
+            zobrist_key=zobrist_key^random_num[i][1];
+        if(piece==2)
+            zobrist_key=zobrist_key^random_num[i][2];
+        if(piece==-2)
+            zobrist_key=zobrist_key^random_num[i][3];
+        if(piece==3)
+            zobrist_key=zobrist_key^random_num[i][4];
+        if(piece==-3)
+            zobrist_key=zobrist_key^random_num[i][5];
+        if(piece==4)
+            zobrist_key=zobrist_key^random_num[i][6];
+        if(piece==-4)
+            zobrist_key=zobrist_key^random_num[i][7];
+        if(piece==5)
+            zobrist_key=zobrist_key^random_num[i][8];
+        if(piece==-5)
+            zobrist_key=zobrist_key^random_num[i][9];
+        if(piece==6)
+            zobrist_key=zobrist_key^random_num[i][10];
+        if(piece==-6)
+            zobrist_key=zobrist_key^random_num[i][11];
+        if(piece==7)
+            zobrist_key=zobrist_key^random_num[i][12];
+        if(piece==-7)
+            zobrist_key=zobrist_key^random_num[i][13];
+        if(piece==9)
+            zobrist_key=zobrist_key^random_num[i][14];
+        if(piece==-9)
+            zobrist_key=zobrist_key^random_num[i][15];
+
+    }
+    if(plr==-1)
+    {
+        zobrist_key=zobrist_key^rand;
+    }
+    return(zobrist_key);
+}
+ChessBoard:: node* ChessBoard:: create_node(int alpha,int beta,int eval,uint64_t hash,int depth,int move_num)
+{
+    node* nde=new node();
+    if(alpha>127)
+        alpha=130;
+    if(beta>127)
+        beta=130;
+    nde->HashVal=hash;
+    nde->depth=depth;
+    if(eval>127)
+        eval=130;
+    nde->Eval=eval;
+    nde->move_num=move_num;
+    return nde;
+}
+void ChessBoard:: search_node(uint64_t hash)
+{
+    nd_arr[0]=NULL;
+    nd_arr[1]=NULL;
+    long loc=hash%c;
+    nd_arr[0]=nd[loc];
+
+    if(nd[loc]==NULL)
+    {
+        return;
+    }
+    
+    for(node* temp=nd[loc];temp!=NULL;temp=temp->next)
+    {
+        
+        if(temp==NULL)
+        {
+            break;
+        }
+        if(temp->move_num<move_num)
+        {
+            nd_arr[0]=temp;
+            nd_arr[1]=temp;
+            return;
+        }
+        if(temp->HashVal==hash)
+        {
+            nd_arr[0]=temp;
+            nd_arr[1]=NULL;
+            return;
+        }
+        else{
+            nd_arr[1]=temp;
+        }
+    }
+    return;
+}
 
 long long evaluate(int depth, ChessBoard &base_board, int &plr){
     vector<vector<int>> moves;
@@ -1279,6 +1400,7 @@ int getBoardValue(ChessBoard &b, int &plr){
 
 int minimax(ChessBoard &b, int &plr, int depth){
     if(depth == 0){
+        countmoves++;
         return getBoardValue(b, plr);
     }
     
@@ -1315,8 +1437,214 @@ int minimax(ChessBoard &b, int &plr, int depth){
     return bestvalue;
 }
 
-int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
+int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int beta){
+    int val=130;
+    bool flag=false;
+    uint64_t key= b.Gen_Zobrist_Key(plr);
+    b.search_node(key);
+    bool array_null=false;
+    bool no_node=true;
+    long loc=0;
+    if(b.nd_arr[0]==NULL && b.nd_arr[1]==NULL)
+    {
+        array_null=true;
+        loc=key%(b.c);
+    }
+    else if(b.nd_arr[0]!=NULL && b.nd_arr[1]==NULL)
+    {
+        no_node=false;
+        if(b.nd_arr[0]->Eval<=127 && b.nd_arr[0]->depth>=depth)
+        {   
+            return(b.nd_arr[0]->Eval);   
+        }
+    }
+    if(b.nd_arr[0]!=NULL && b.nd_arr[1]!=NULL)
+    {
+        no_node=false;
+    }
+    
     if(depth == 0){
+        int value=getBoardValue(b, plr);
+        val=value;
+        if(b.nd_arr[0]!=NULL && b.nd_arr[1]!=NULL)
+        {
+            b.nd_arr[0]->move_num=b.move_num;
+            b.nd_arr[0]->Eval=val;
+            b.nd_arr[0]->depth=depth;
+        }
+        if(array_null)
+        {
+            b.nd[loc]=b.create_node(alpha,beta,val,key,depth,b.move_num);
+        }
+        else if(no_node)
+        {
+            b.nd_arr[1]->next=b.create_node(alpha,beta,val,key,depth,b.move_num);
+        }
+        else
+        {
+            if(b.nd_arr[0]->Eval>127 && val<=127)
+            {
+                b.nd_arr[0]->Eval=val;
+                b.nd_arr[0]->depth=depth;
+            }
+        }
+        countmoves++;
+        return getBoardValue(b, plr);
+    }
+    
+    vector<vector<int>> moves;
+    moves = b.genMovesForEachPiece(plr);
+    vector<int> temp_board = b.board;
+    int w_king = b.wking_pos;
+    int b_king = b.bking_pos;
+    int en_pessant = b.En_pessant_pos;
+    int half_move = b.half_move;
+
+    if(plr == WHITE){
+        int value = -99999;
+        for(int i = 0; i < moves.size(); i++){
+            b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            plr = -plr;
+
+            value = max(value, minimaxAlphaBetaZobrist(b, plr, depth - 1, alpha, beta));
+
+            plr = -plr;
+
+            b.board = temp_board;
+            b.wking_pos = w_king;
+            b.bking_pos = b_king;
+            b.En_pessant_pos = en_pessant;
+            b.half_move = half_move;
+
+            if(value >= beta)
+                break;
+                
+            
+            alpha = max(alpha, value);
+        }
+        b.search_node(key);
+        
+        if(!flag)
+        {
+            val=value;
+        }
+        if(b.nd_arr[0]!=NULL && b.nd_arr[1]!=NULL)
+        {
+            b.nd_arr[0]->move_num=b.move_num;
+            b.nd_arr[0]->Eval=val;
+            b.nd_arr[0]->depth=depth;
+        }
+        if(array_null)
+        {
+            b.nd[loc]=b.create_node(alpha,beta,val,key,depth,b.move_num);
+        }
+        else if(no_node)
+        {
+            b.nd_arr[1]->next=b.create_node(alpha,beta,val,key,depth,b.move_num);
+        }
+        else
+        {
+            if(b.nd_arr[0]->Eval>127 && val<=127)
+            {
+                b.nd_arr[0]->Eval=val;
+                b.nd_arr[0]->depth=depth;
+            }
+            if(b.nd_arr[0]->Eval<=127 && val<=127 && b.nd_arr[0]->depth<depth)
+            {
+                b.nd_arr[0]->Eval=val;
+                b.nd_arr[0]->depth=depth;
+            }
+        }
+        
+        return value;
+    }
+
+    else{
+        int value = 99999;
+        for(int i = 0; i < moves.size(); i++){
+            b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            plr = -plr;
+
+            value = min(value, minimaxAlphaBetaZobrist(b, plr, depth - 1, alpha, beta));
+
+            plr = -plr;
+
+            b.board = temp_board;
+            b.wking_pos = w_king;
+            b.bking_pos = b_king;
+            b.En_pessant_pos = en_pessant;
+            b.half_move = half_move;
+
+            if(value <= alpha)
+            {
+                flag=true;
+                break;
+            }
+            beta = min(value, beta);
+        }
+        
+        b.search_node(key);
+        
+        if(!flag)
+        {
+            val=value;
+        }
+        if(b.nd_arr[0]!=NULL && b.nd_arr[1]!=NULL)
+        {
+            b.nd_arr[0]->move_num=b.move_num;
+            b.nd_arr[0]->Eval=val;
+            b.nd_arr[0]->depth=depth;
+        }
+        if(array_null)
+        {
+            b.nd[loc]=b.create_node(alpha,beta,val,key,depth,b.move_num);
+        }
+        else if(no_node)
+        {
+            b.nd_arr[1]->next=b.create_node(alpha,beta,val,key,depth,b.move_num);
+        }
+        else
+        {
+            if(b.nd_arr[0]->Eval>127 && val<=127)
+            {
+                b.nd_arr[0]->Eval=val;
+                b.nd_arr[0]->depth=depth;
+            }
+        }
+        
+        return value;
+    }
+}
+int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
+    int val=130;
+    bool flag=false;
+    /*
+    uint64_t key= b.Gen_Zobrist_Key(plr);
+    b.search_node(key);
+    
+ 
+    bool array_null=false;
+    bool no_node=true;
+    long loc=0;
+    if(b.nd_arr[0]==NULL && b.nd_arr[1]==NULL)
+    {
+        array_null=true;
+        loc=key%(b.c);
+    }
+    else if(b.nd_arr[0]!=NULL && b.nd_arr[1]==NULL)
+    {
+        no_node=false;
+        if(b.nd_arr[0]->Eval<=127 && b.nd_arr[0]->depth>=depth)
+        {
+            return(b.nd_arr[0]->Eval);
+        }
+    }
+    */
+    
+    if(depth == 0){
+        countmoves++;
         return getBoardValue(b, plr);
     }
     
@@ -1347,10 +1675,34 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
 
             if(value >= beta)
                 break;
+                
             
             alpha = max(alpha, value);
         }
-
+        /*
+        b.search_node(key);
+        
+        if(!flag)
+        {
+            val=value;
+        }
+        if(array_null)
+        {
+            b.nd[loc]=b.create_node(alpha,beta,val,key,depth);
+        }
+        else if(no_node)
+        {
+            b.nd_arr[1]->next=b.create_node(alpha,beta,val,key,depth);
+        }
+        else
+        {
+            if(b.nd_arr[0]->Eval>127 && val<=127)
+            {
+                b.nd_arr[0]->Eval=val;
+                b.nd_arr[0]->depth=depth;
+            }
+        }
+        */
         return value;
     }
 
@@ -1372,11 +1724,175 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
             b.half_move = half_move;
 
             if(value <= alpha)
+            {
+                flag=true;
                 break;
-
+            }
             beta = min(value, beta);
         }
+        /*
+        b.search_node(key);
+        if(!flag)
+        {
+            val=value;
+        }
+        if(array_null)
+        {
+            b.nd[loc]=b.create_node(alpha,beta,val,key,depth);
+        }
+        else if(no_node)
+        {
+            b.nd_arr[1]->next=b.create_node(alpha,beta,val,key,depth);
+        }
+        else
+        {
+            if(b.nd_arr[0]->Eval>127 && val<=127)
+            {
+                b.nd_arr[0]->Eval=val;
+                b.nd_arr[0]->depth=depth;
+            }
+        }
+        */
         return value;
     }
 
+
 }
+int main()
+{
+    vector<int> board = {
+ -7,   0,  -3,  -5,  -1,  -3,  -4,  -7,
+ -2,  -2,  -2,  -2,  -2,  -2,  -2,  -2,
+  0,   0,  -4,   0,   0,   0,   0,   0,
+  0,   0,   0,   0,   0,   0,   0,   0,
+  0,   0,   0,   0,   0,   0,   0,   0,
+  2,   0,   0,   0,   0,   0,   0,   0,
+  0,   2,   2,   2,   2,   2,   2,   2,
+  7,   4,   3,   5,   1,   3,   4,   7};
+    
+    /*vector<int> board = {-7, -4, -3, -5, -1, -3, -4, -7,
+ -2, -2, -2,  0, -2, -2, -2, -2,
+  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,
+  2,  0,  0, -2,  2,  0,  0,  0,
+  4,  0,  0,  0,  9,  0,  0,  0,
+  0,  2,  2,  2,  0,  2,  2,  2,
+  7,  0,  3,  5,  1,  3,  4,  7};
+    */
+
+    //vector<int> board = {-6, -4, -3, -5, 0, -1, 0, -6, -2, -2, 0, 0, -3, -2, -2, -2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 4, -4, 2, 2, 7, 4, 3, 5, 1, 0, 0, 7};
+
+    //vector<int> board = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -4, 0, 0, 0, 1, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0};
+    ChessBoard start_board(board, 0);
+
+    vector<int>().swap(board);
+    
+    start_board.nd[2645]=start_board.create_node(0,0,1,2645,6,0);
+    cout<<"Hey";
+    start_board.search_node(2645);
+    cout<<start_board.nd_arr[0]->Eval;
+    uint64_t zobrist=start_board.Gen_Zobrist_Key(1);
+    cout<<zobrist<<" "<<zobrist%start_board.c;
+    //start_board.ChangeBoard(51, 51 - 8);
+    //start_board.ChangeBoard(8, 16);
+    
+    for(int i = 0; i < 64; i++){
+        if(i % 8 == 0)
+            cout<<endl;
+        
+        cout<<setw(3)<<start_board.board[i]<<", ";
+    }
+
+    cout<<endl<<"With Pure Minimax:"<<endl;
+    start_board.getEdgeDistance();
+    using namespace std::chrono;
+    int start_friendly = WHITE;
+
+    //cout<<endl<<"value = "<<getBoardValue(start_board, start_friendly);
+    /*
+    for(int depth = 1; depth <= 5; depth++){
+        auto start = high_resolution_clock::now();
+        countmoves = 0;
+        minimax(start_board, start_friendly, depth);
+        
+        cout<<"at depth "<<depth<<": moves = "<<countmoves;
+
+        auto stop = high_resolution_clock::now();
+
+        auto duration = duration_cast<milliseconds>(stop - start);
+
+        cout<<"     time required: "<<duration.count()<<" milliseconds"<<endl;
+    }
+
+    //cout<<"Done!"<<endl;
+
+    cout<<endl<<"With Minimax + alpha beta pruning"<<endl;
+
+    for(int depth = 1; depth <= 7; depth++){
+        auto start = high_resolution_clock::now();
+        countmoves = 0;
+        minimaxAlphaBeta(start_board, start_friendly, depth, -99999, 99999);
+        
+        cout<<"at depth "<<depth<<": moves = "<<countmoves;
+
+        auto stop = high_resolution_clock::now();
+
+        auto duration = duration_cast<milliseconds>(stop - start);
+
+        cout<<"     time required: "<<duration.count()<<" milliseconds"<<endl;
+    }
+    */
+    int plr=-1;
+    cout<<endl<<"With Minimax + alpha beta pruning+Zobrist"<<endl;
+    
+    for(int depth = 1; depth <= 5; depth++){
+        auto start = high_resolution_clock::now();
+        countmoves = 0;
+        minimaxAlphaBetaZobrist(start_board, plr, depth, -99999, 99999);
+        
+        cout<<"at depth "<<depth<<": moves = "<<countmoves;
+
+        auto stop = high_resolution_clock::now();
+
+        auto duration = duration_cast<milliseconds>(stop - start);
+
+        cout<<"     time required: "<<duration.count()<<" milliseconds"<<endl;
+    }
+    start_board.move_num++;
+    vector<vector<int>> moves;
+    plr=-plr;
+    for(int iter=0;iter<1;iter++)
+    {
+    start_board.move_num++;
+    moves=start_board.genMovesForEachPiece(plr);
+    if(moves.size()==0)
+        break;
+      for(int i = 0; i < 64; i++){
+        if(i % 8 == 0)
+            cout<<endl;
+        
+        cout<<setw(3)<<start_board.board[i]<<", ";
+    }
+    cout<<endl<<plr;
+    cout<<endl<<"With Minimax + alpha beta pruning+Zobrist"<<endl;
+    for(int depth = 1; depth <= 5; depth++){
+        auto start = high_resolution_clock::now();
+        countmoves = 0;
+        minimaxAlphaBetaZobrist(start_board, start_friendly, depth, -99999, 99999);
+        
+        cout<<"at depth "<<depth<<": moves = "<<countmoves;
+
+        auto stop = high_resolution_clock::now();
+
+        auto duration = duration_cast<milliseconds>(stop - start);
+
+        cout<<"     time required: "<<duration.count()<<" milliseconds"<<endl;
+    
+    }
+    plr=-plr;
+    start_board.ChangeBoard(moves[0][0],moves[0][1]);
+    }
+    
+
+}
+  
