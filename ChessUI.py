@@ -6,7 +6,7 @@ import numpy as np
 import os
 
 from Functions.FEN_parser import fen_code_parser
-print("Hi");
+
 from Functions.CompileC import CompileClass
 
 import time
@@ -16,7 +16,13 @@ import cppyy
 from pygame import mixer
 CompileClass()
 from cppyy.gbl import ChessBoard
-from cppyy.gbl import evaluate
+from cppyy.gbl import minimaxAlphaBetaZobrist
+from cppyy.gbl import EvaluateBoard
+
+
+#end=time.time()
+#print(end-strt)
+
 pygame.init()
 
 mixer.init()
@@ -304,6 +310,7 @@ def main():
     FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
     #creates the board object
+    
     board=ChessBoard(chess_board.flatten(),half_move)
     board.getEdgeDistance()
     moveset=extractlist(list(board.genMovesForEachPiece(plr)))
@@ -364,10 +371,25 @@ def main():
                                     CAPTURE_SOUND.play()
                                 else:
                                     MOVE_SOUND.play()
-
                                 if(prom==0):
                                     plr=-plr
-                                    moveset=extractlist(list(board.genMovesForEachPiece(plr)))
+                                    
+                                    
+                                    draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
+                                    best_move=list(EvaluateBoard(board,-player))
+                                    chess_board=list(board.board)
+                                    chess_board=np.reshape(chess_board,(8,8))
+                                    board.ChangeBoard(best_move[0],best_move[1])
+                                    chess_board=list(board.board)
+                                    chess_board=np.reshape(chess_board,(8,8))
+                                    print(np.reshape(list(board.board),(8,8)))
+                                    moveset=extractlist(list(board.genMovesForEachPiece(player)))
+                                    print(moveset)
+                                    plr=-plr
+                                    peice=0
+                                    continue;
+                                    
+
                                     
                                     
                         peice=0
@@ -414,7 +436,8 @@ def main():
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         plr=-plr
-                        moveset=extractlist(list(board.genMovesForEachPiece(plr)))
+                        moveset=extractlist(list(board.genMovesForEachPiece(player)))
+                        
                         prom=0
                         prom_sqr=(65,65)
                     

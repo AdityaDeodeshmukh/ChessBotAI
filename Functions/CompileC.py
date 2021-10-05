@@ -1,6 +1,6 @@
 
 import cppyy
-print("Hi1")
+
 def CompileClass():
     move_file = open("Functions/move_generator.cpp", "r")
     lines_list = move_file.readlines()
