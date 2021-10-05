@@ -150,8 +150,18 @@ class ChessBoard{
 
         
 };
-void ChessBoard::Promote(int sqr, int p, int friendly)
+void ChessBoard::Promote(int sqr, int friendly, int p)
 {
+    static int i = 0;
+    bool plr_promote = true;
+    if(i > 3)
+        i = 0;
+
+    if(p == -1){
+        p = i;
+        plr_promote = false;
+    }
+
     if (p == 0){
         board[sqr] = friendly * QUEEN;
     }
@@ -164,6 +174,9 @@ void ChessBoard::Promote(int sqr, int p, int friendly)
     if (p == 3){
         board[sqr] = friendly * ROOK;
     }
+
+    if(plr_promote == false)
+        i++;
 }
 
 int ChessBoard::ChangeBoard(int start, int end)
@@ -180,12 +193,10 @@ int ChessBoard::ChangeBoard(int start, int end)
     int val=0;
     if(board[start]==WHITE * PAWN && end<=7 && end>=0)
     {
-        
         val=1;
     }
     if(board[start]==BLACK * PAWN && end<=63 && end>=56)
     {
-    
         val=-1;
     }
     if(board[start] == WHITE * KING)
@@ -200,6 +211,30 @@ int ChessBoard::ChangeBoard(int start, int end)
         friendly = BLACK;
     if (friendly == 0)
         return(val);
+    
+    //updating the piece positions in the piece position storage vectors
+    //handling castling and en passant later
+    if(!(abs(board[start]) == PAWN && abs(board[end]) == EN_PASSANT_SQ) && !(board[start] == friendly * KING && abs(start - end) == 2)){
+        if(friendly == WHITE){
+            auto piecepos = find(whitepieces.begin(), whitepieces.end(), start);
+            *piecepos = end;
+            if(board[end] < 0 && abs(board[end]) != EN_PASSANT_SQ){
+                piecepos = find(blackpieces.begin(), blackpieces.end(), end);
+                blackpieces.erase(piecepos);
+            }   
+        }
+
+        else{
+            auto piecepos = find(blackpieces.begin(), blackpieces.end(), start);
+            *piecepos = end;
+            if(board[end] > 0 && abs(board[end]) != EN_PASSANT_SQ){
+                piecepos = find(whitepieces.begin(), whitepieces.end(), end);
+                whitepieces.erase(piecepos);
+            }
+        }
+    }
+
+    //changing the actual board now
     if (En_pessant_pos != 64)
     {
         if (abs(board[start]) == PAWN && abs(board[end]) == EN_PASSANT_SQ)
@@ -208,6 +243,22 @@ int ChessBoard::ChangeBoard(int start, int end)
             board[end] = PAWN * friendly;
             board[end + 8 * friendly] = EMPTY_SQ;
             En_pessant_pos = 64;
+
+            /*handling en passant piece position update*/
+            if(friendly == WHITE){
+                auto piecepos = find(whitepieces.begin(), whitepieces.end(), start);
+                *piecepos = end;
+                piecepos = find(blackpieces.begin(), blackpieces.end(), (end + 8 * friendly));
+                blackpieces.erase(piecepos);
+            }
+
+            else{
+                auto piecepos = find(blackpieces.begin(), blackpieces.end(), start);
+                *piecepos = end;
+                piecepos = find(whitepieces.begin(), whitepieces.end(), (end + 8 * friendly));
+                whitepieces.erase(piecepos);
+            }
+
             return(val);
         }
     }
@@ -236,6 +287,15 @@ int ChessBoard::ChangeBoard(int start, int end)
             {
                 board[56]=WHITE * ROOK;
             }
+
+            //implementing piece position update for 
+            //white king side castling
+            auto piecepos = find(whitepieces.begin(), whitepieces.end(), start);
+            *piecepos = end;
+            
+            piecepos = find(whitepieces.begin(), whitepieces.end(), 63);
+            *piecepos = (start + end) / 2;
+
             return(val);
         }
         if (board[start] == WHITE * KING && (end - start) < 0)
@@ -248,6 +308,15 @@ int ChessBoard::ChangeBoard(int start, int end)
             {
                 board[63]=WHITE * ROOK;
             }
+
+            //implementing piece position update for 
+            //white queen side castling
+            auto piecepos = find(whitepieces.begin(), whitepieces.end(), start);
+            *piecepos = end;
+            
+            piecepos = find(whitepieces.begin(), whitepieces.end(), 56);
+            *piecepos = (start + end) / 2;
+
             return(val);
         }
         if (board[start] == BLACK * KING && (end - start) > 0)
@@ -261,6 +330,15 @@ int ChessBoard::ChangeBoard(int start, int end)
             {
                 board[0]=BLACK * ROOK;
             }
+
+            //implementing piece position update for 
+            //black king side castling
+            auto piecepos = find(blackpieces.begin(), blackpieces.end(), start);
+            *piecepos = end;
+            
+            piecepos = find(blackpieces.begin(), blackpieces.end(), 7);
+            *piecepos = (start + end) / 2;
+
             return(val);
         }
         if (board[start] == BLACK * KING && (end - start) < 0)
@@ -273,6 +351,15 @@ int ChessBoard::ChangeBoard(int start, int end)
             {
                 board[7]=BLACK * ROOK;
             }
+
+            //implementing piece position update for 
+            //black king side castling
+            auto piecepos = find(blackpieces.begin(), blackpieces.end(), start);
+            *piecepos = end;
+            
+            piecepos = find(blackpieces.begin(), blackpieces.end(), 0);
+            *piecepos = (start + end) / 2;
+
             return(val);
         }
     }
@@ -490,7 +577,7 @@ int ChessBoard::IsCheck(int &friendly)
     return check;
 }
 
-//gets the distance of eacj square from edges in all 8 direcions and stores it in edges vector
+//gets the distance of each square from edges in all 8 direcions and stores it in edges vector
 void ChessBoard::getEdgeDistance(){
     for(int i = 0; i < 64; i++){
         vector <int> distance;
@@ -536,7 +623,20 @@ vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
         genMoves(kingpos, friendly, checks);
     }
 
-    else{    
+    else{
+
+        if(friendly == WHITE){
+            for(int i = 0; i < whitepieces.size(); i++){
+                genMoves(whitepieces[i], friendly, checks);
+            }
+        }
+
+        else{
+            for(int i = 0; i < blackpieces.size(); i++){
+                genMoves(blackpieces[i], friendly, checks);
+            }
+        }
+        /*
         //checking each square on the board for friendly pieces
         for(int i = 0; i < 64; i++){
             //if no piece at this position then skip
@@ -550,6 +650,7 @@ vector<vector<int>> ChessBoard::genMovesForEachPiece(int friendly){
 
             //append list of moves to legalmoves vector
         }
+        */
     }
 
     makeLegal(friendly, checks, kingpos);
@@ -992,7 +1093,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         
                     //}
                     legalMoves.push_back(move);
-                    
+                    if(pawn == true && ((friendly == WHITE && pos >= 0 && pos <= 7) || (friendly == BLACK && pos >= 56 && pos <= 63))){
+                        legalMoves.push_back(move);
+                        legalMoves.push_back(move);
+                        legalMoves.push_back(move);
+                    }
 
                     pos += offset;
                     move_limit--;
@@ -1023,11 +1128,25 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                     if(edges[start_pos][5] && board[start_pos - 7] < 0){
                         move.push_back(start_pos - 7);
                         legalMoves.push_back(move);
+
+                        if(start_pos - 7 >= 0 && start_pos - 7 <= 7){
+                            legalMoves.push_back(move);
+                            legalMoves.push_back(move);
+                            legalMoves.push_back(move);
+                        }
+
                         move.pop_back();
                     }
                     if(edges[start_pos][6] && board[start_pos - 9] < 0){
                         move.push_back(start_pos - 9);
                         legalMoves.push_back(move);
+
+                        if(start_pos - 9 >= 0 && start_pos - 9 <= 7){
+                            legalMoves.push_back(move);
+                            legalMoves.push_back(move);
+                            legalMoves.push_back(move);
+                        }
+
                         move.pop_back();
                     }
                     
@@ -1037,11 +1156,25 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                     if(edges[start_pos][4] && board[start_pos + 9] > 0){
                         move.push_back(start_pos + 9);
                         legalMoves.push_back(move);
+
+                        if(start_pos + 9 >= 56 && start_pos + 9 <= 63){
+                            legalMoves.push_back(move);
+                            legalMoves.push_back(move);
+                            legalMoves.push_back(move);
+                        }
+
                         move.pop_back();
                     }
                     if(edges[start_pos][7] && board[start_pos + 7] > 0){
                         move.push_back(start_pos + 7);
                         legalMoves.push_back(move);
+
+                        if(start_pos + 7 >= 56 && start_pos + 7 <= 63){
+                            legalMoves.push_back(move);
+                            legalMoves.push_back(move);
+                            legalMoves.push_back(move);
+                        }
+
                         move.pop_back();
                     }
                 }
@@ -1373,20 +1506,31 @@ long long evaluate(int depth, ChessBoard &base_board, int &plr){
     }
 }
 
+vector<vector<int>> getCaptureMoves(vector<vector<int>> &movelist, int plr){
+    vector<vector<int>> capturemovelist;
+    for(auto move_it = movelist.begin(); move_it != movelist.end(); move_it++){
+        auto move = move_it->begin();
+        if(*(move + 1) != 0 && *(move + 1) != plr * EN_PASSANT_SQ)
+            capturemovelist.push_back(*move_it);
+    }
+
+    return capturemovelist;
+}
+
 int getBoardValue(ChessBoard &b, int &plr){
     static const int values[] = {0, 0, 1, 3, 3, 9, 5, 5};
     int totalvalue = 0;
     
-    /*
+    
     for(auto it = b.whitepieces.begin(); it != b.whitepieces.end(); it++){
         totalvalue += values[b.board[*it]];
     }
 
     for(auto it = b.blackpieces.begin(); it != b.blackpieces.end(); it++){
-        totalvalue -= values[b.board[*it]];
-    }*/
+        totalvalue -= values[abs(b.board[*it])];
+    }
 
-    for(int i = 0; i < 64; i++){
+    /*for(int i = 0; i < 64; i++){
         if(b.board[i] < 0 && abs(b.board[i]) != EN_PASSANT_SQ){
             totalvalue -= values[abs(b.board[i])];
         }
@@ -1394,8 +1538,8 @@ int getBoardValue(ChessBoard &b, int &plr){
             totalvalue += values[b.board[i]];
         }
             
-    }
-    return totalvalue ;
+    }*/
+    return totalvalue;
 }
 
 int minimax(ChessBoard &b, int &plr, int depth){
@@ -1411,11 +1555,24 @@ int minimax(ChessBoard &b, int &plr, int depth){
     int b_king = b.bking_pos;
     int en_pessant = b.En_pessant_pos;
     int half_move = b.half_move;
+    vector<int> temp_whitepieces = b.whitepieces;
+    vector<int> temp_blackpieces = b.blackpieces;
 
     int bestvalue = -99999;
 
     for(int i = 0; i < moves.size(); i++){
+        //checking if the move is pawn promotion
+        bool promote = false;
+        if(b.board[moves[i][0]] == plr * PAWN){
+            if((plr == WHITE && moves[i][1] >= 0 && moves[i][1] <= 7) || (plr == BLACK && moves[i][1] >= 56 && moves[i][1] <= 63))
+                promote = true;
+        }
+        
         b.ChangeBoard(moves[i][0], moves[i][1]);
+        
+        //if promotion is found then the pawn is promoted
+        if(promote)
+            b.Promote(moves[i][1], plr);
 
         plr = -plr;
 
@@ -1432,6 +1589,8 @@ int minimax(ChessBoard &b, int &plr, int depth){
         b.bking_pos = b_king;
         b.En_pessant_pos = en_pessant;
         b.half_move = half_move;
+        b.blackpieces = temp_blackpieces;
+        b.whitepieces = temp_whitepieces;
     }
 
     return bestvalue;
@@ -1661,11 +1820,24 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
     int b_king = b.bking_pos;
     int en_pessant = b.En_pessant_pos;
     int half_move = b.half_move;
+    vector<int> temp_whitepieces = b.whitepieces;
+    vector<int> temp_blackpieces = b.blackpieces;
 
     if(plr == WHITE){
         int value = -127;
         for(int i = 0; i < moves.size(); i++){
+            //checking if the move is pawn promotion
+            bool promote = false;
+            if(b.board[moves[i][0]] == plr * PAWN){
+                if((plr == WHITE && moves[i][1] >= 0 && moves[i][1] <= 7) || (plr == BLACK && moves[i][1] >= 56 && moves[i][1] <= 63))
+                    promote = true;
+            }
+            
             b.ChangeBoard(moves[i][0], moves[i][1]);
+            
+            //if promotion is found then the pawn is promoted
+            if(promote)
+                b.Promote(moves[i][1], plr);
 
             plr = -plr;
 
@@ -1678,6 +1850,8 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
             b.bking_pos = b_king;
             b.En_pessant_pos = en_pessant;
             b.half_move = half_move;
+            b.blackpieces = temp_blackpieces;
+            b.whitepieces = temp_whitepieces;
 
             if(value >= beta)
                 break;
@@ -1715,7 +1889,18 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
     else{
         int value = 127;
         for(int i = 0; i < moves.size(); i++){
+            //checking if the move is pawn promotion
+            bool promote = false;
+            if(b.board[moves[i][0]] == plr * PAWN){
+                if((plr == WHITE && moves[i][1] >= 0 && moves[i][1] <= 7) || (plr == BLACK && moves[i][1] >= 56 && moves[i][1] <= 63))
+                    promote = true;
+            }
+            
             b.ChangeBoard(moves[i][0], moves[i][1]);
+            
+            //if promotion is found then the pawn is promoted
+            if(promote)
+                b.Promote(moves[i][1], plr);
 
             plr = -plr;
 
@@ -1728,6 +1913,8 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
             b.bking_pos = b_king;
             b.En_pessant_pos = en_pessant;
             b.half_move = half_move;
+            b.blackpieces = temp_blackpieces;
+            b.whitepieces = temp_whitepieces;
 
             if(value <= alpha)
             {
