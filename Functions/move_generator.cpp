@@ -1649,6 +1649,8 @@ int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int be
     int b_king = b.bking_pos;
     int en_pessant = b.En_pessant_pos;
     int half_move = b.half_move;
+    vector<int> temp_whitepieces = b.whitepieces;
+    vector<int> temp_blackpieces = b.blackpieces;
     
     if(plr == WHITE){
         int value = -99999;
@@ -1666,6 +1668,8 @@ int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int be
             b.bking_pos = b_king;
             b.En_pessant_pos = en_pessant;
             b.half_move = half_move;
+            b.blackpieces = temp_blackpieces;
+            b.whitepieces = temp_whitepieces;
 
             if(value >= beta)
                 break;
@@ -1726,6 +1730,8 @@ int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int be
             b.bking_pos = b_king;
             b.En_pessant_pos = en_pessant;
             b.half_move = half_move;
+            b.blackpieces = temp_blackpieces;
+            b.whitepieces = temp_whitepieces;
 
             if(value <= alpha)
             {
@@ -1944,6 +1950,8 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
         int b_king = b.bking_pos;
         int en_pessant = b.En_pessant_pos;
         int half_move = b.half_move;
+        vector<int> temp_whitepieces = b.whitepieces;
+        vector<int> temp_blackpieces = b.blackpieces;
         if(plr == WHITE)
         {
             
@@ -1952,7 +1960,7 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
 
             plr = -plr;
 
-            value = minimaxAlphaBeta(b, plr, depth - 1, alpha, beta);
+            value = minimaxAlphaBetaZobrist(b, plr, depth - 1, alpha, beta);
             if(value>best_eval)
             {
                 best_move[0]=moves[i][0];
@@ -1966,6 +1974,8 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
             b.bking_pos = b_king;
             b.En_pessant_pos = en_pessant;
             b.half_move = half_move;
+            b.blackpieces = temp_blackpieces;
+            b.whitepieces = temp_whitepieces;
 
             if(value >= beta)
                 break;
@@ -1982,7 +1992,7 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
 
             plr = -plr;
 
-            value = minimaxAlphaBeta(b, plr, depth - 1, alpha, beta);
+            value = minimaxAlphaBetaZobrist(b, plr, depth - 1, alpha, beta);
             if(value<best_eval)
             {
                 best_move[0]=moves[i][0];
@@ -1997,6 +2007,8 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
             b.bking_pos = b_king;
             b.En_pessant_pos = en_pessant;
             b.half_move = half_move;
+            b.blackpieces = temp_blackpieces;
+            b.whitepieces = temp_whitepieces;
 
             if(value <= alpha)
                 break;
@@ -2007,5 +2019,3 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
     }
     return(best_move);
 }
-
-  
