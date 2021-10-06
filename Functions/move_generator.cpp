@@ -139,7 +139,7 @@ class ChessBoard{
 
         int ChangeBoard(int start,int end);
         
-        void Promote(int sqr,int friendly,int p = -1);
+        void Promote(int sqr,int p,int friendly);
         uint64_t Gen_Zobrist_Key(int plr);
         void makeLegal(int &friendly, int &checks, int &kingpos);
         node* create_node(int evaluation,int alpha,int beta,uint64_t hash,int depth,int move_num);
@@ -150,18 +150,8 @@ class ChessBoard{
 
         
 };
-void ChessBoard::Promote(int sqr, int friendly, int p)
+void ChessBoard::Promote(int sqr, int p, int friendly)
 {
-    static int i = 0;
-    bool plr_promote = true;
-    if(i > 3)
-        i = 0;
-
-    if(p == -1){
-        p = i;
-        plr_promote = false;
-    }
-
     if (p == 0){
         board[sqr] = friendly * QUEEN;
     }
@@ -174,9 +164,6 @@ void ChessBoard::Promote(int sqr, int friendly, int p)
     if (p == 3){
         board[sqr] = friendly * ROOK;
     }
-
-    if(plr_promote == false)
-        i++;
 }
 
 int ChessBoard::ChangeBoard(int start, int end)
@@ -1093,11 +1080,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         
                     //}
                     legalMoves.push_back(move);
-                    if(pawn == true && ((friendly == WHITE && pos >= 0 && pos <= 7) || (friendly == BLACK && pos >= 56 && pos <= 63))){
+                    /*if(pawn == true && ((friendly == WHITE && pos >= 0 && pos <= 7) || (friendly == BLACK && pos >= 56 && pos <= 63))){
                         legalMoves.push_back(move);
                         legalMoves.push_back(move);
                         legalMoves.push_back(move);
-                    }
+                    }*/
 
                     pos += offset;
                     move_limit--;
@@ -1129,11 +1116,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         move.push_back(start_pos - 7);
                         legalMoves.push_back(move);
 
-                        if(start_pos - 7 >= 0 && start_pos - 7 <= 7){
+                        /*if(start_pos - 7 >= 0 && start_pos - 7 <= 7){
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
-                        }
+                        }*/
 
                         move.pop_back();
                     }
@@ -1141,11 +1128,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         move.push_back(start_pos - 9);
                         legalMoves.push_back(move);
 
-                        if(start_pos - 9 >= 0 && start_pos - 9 <= 7){
+                        /*if(start_pos - 9 >= 0 && start_pos - 9 <= 7){
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
-                        }
+                        }*/
 
                         move.pop_back();
                     }
@@ -1157,11 +1144,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         move.push_back(start_pos + 9);
                         legalMoves.push_back(move);
 
-                        if(start_pos + 9 >= 56 && start_pos + 9 <= 63){
+                        /*if(start_pos + 9 >= 56 && start_pos + 9 <= 63){
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
-                        }
+                        }*/
 
                         move.pop_back();
                     }
@@ -1169,11 +1156,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         move.push_back(start_pos + 7);
                         legalMoves.push_back(move);
 
-                        if(start_pos + 7 >= 56 && start_pos + 7 <= 63){
+                        /*if(start_pos + 7 >= 56 && start_pos + 7 <= 63){
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
-                        }
+                        }*/
 
                         move.pop_back();
                     }
@@ -1561,18 +1548,9 @@ int minimax(ChessBoard &b, int &plr, int depth){
     int bestvalue = -99999;
 
     for(int i = 0; i < moves.size(); i++){
-        //checking if the move is pawn promotion
-        bool promote = false;
-        if(b.board[moves[i][0]] == plr * PAWN){
-            if((plr == WHITE && moves[i][1] >= 0 && moves[i][1] <= 7) || (plr == BLACK && moves[i][1] >= 56 && moves[i][1] <= 63))
-                promote = true;
-        }
         
         b.ChangeBoard(moves[i][0], moves[i][1]);
         
-        //if promotion is found then the pawn is promoted
-        if(promote)
-            b.Promote(moves[i][1], plr);
 
         plr = -plr;
 
@@ -1826,19 +1804,9 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
     if(plr == WHITE){
         int value = -127;
         for(int i = 0; i < moves.size(); i++){
-            //checking if the move is pawn promotion
-            bool promote = false;
-            if(b.board[moves[i][0]] == plr * PAWN){
-                if((plr == WHITE && moves[i][1] >= 0 && moves[i][1] <= 7) || (plr == BLACK && moves[i][1] >= 56 && moves[i][1] <= 63))
-                    promote = true;
-            }
             
             b.ChangeBoard(moves[i][0], moves[i][1]);
             
-            //if promotion is found then the pawn is promoted
-            if(promote)
-                b.Promote(moves[i][1], plr);
-
             plr = -plr;
 
             value = max(value, minimaxAlphaBeta(b, plr, depth - 1, alpha, beta));
@@ -1889,19 +1857,9 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
     else{
         int value = 127;
         for(int i = 0; i < moves.size(); i++){
-            //checking if the move is pawn promotion
-            bool promote = false;
-            if(b.board[moves[i][0]] == plr * PAWN){
-                if((plr == WHITE && moves[i][1] >= 0 && moves[i][1] <= 7) || (plr == BLACK && moves[i][1] >= 56 && moves[i][1] <= 63))
-                    promote = true;
-            }
             
             b.ChangeBoard(moves[i][0], moves[i][1]);
             
-            //if promotion is found then the pawn is promoted
-            if(promote)
-                b.Promote(moves[i][1], plr);
-
             plr = -plr;
 
             value = min(value, minimaxAlphaBeta(b, plr, depth - 1, alpha, beta));
