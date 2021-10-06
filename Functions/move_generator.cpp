@@ -1581,6 +1581,90 @@ int minimax(ChessBoard &b, int &plr, int depth){
     return bestvalue;
 }
 
+int searchCaptures(ChessBoard &b, int plr, int alpha, int beta){
+    int value = getBoardValue(b, plr);
+    if(plr == WHITE){
+        if(value >= beta)
+            return value;
+        alpha = max(value, alpha);
+    }
+    else{
+        if(value <= alpha)
+            return value;
+        
+        beta = min(value, beta);
+    }
+
+    vector<vector<int>> moves;
+    moves = b.genMovesForEachPiece(plr);
+    vector<int> temp_board = b.board;
+    int w_king = b.wking_pos;
+    int b_king = b.bking_pos;
+    int en_pessant = b.En_pessant_pos;
+    int half_move = b.half_move;
+    vector<int> temp_whitepieces = b.whitepieces;
+    vector<int> temp_blackpieces = b.blackpieces;
+    vector<vector<int>> capturemoves = b.getCaptureMoves(plr);
+
+    if(plr == WHITE){
+        value = -127;
+        for(int i = 0; i < capturemoves.size(); i++){
+            b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            plr = -plr;
+
+            value = max(value, searchCaptures(b, plr, alpha, beta));
+
+            plr = -plr;
+
+            b.board = temp_board;
+            b.wking_pos = w_king;
+            b.bking_pos = b_king;
+            b.En_pessant_pos = en_pessant;
+            b.half_move = half_move;
+            b.blackpieces = temp_blackpieces;
+            b.whitepieces = temp_whitepieces;
+
+            if(value >= beta)
+                break;
+                
+            
+            alpha = max(alpha, value);
+        }
+        return value;
+    }
+    else{
+        value = 127;
+        for(int i = 0; i < moves.size(); i++){
+            
+            b.ChangeBoard(moves[i][0], moves[i][1]);
+            
+            plr = -plr;
+
+            value = min(value, searchCaptures(b, plr, alpha, beta));
+
+            plr = -plr;
+
+            b.board = temp_board;
+            b.wking_pos = w_king;
+            b.bking_pos = b_king;
+            b.En_pessant_pos = en_pessant;
+            b.half_move = half_move;
+            b.blackpieces = temp_blackpieces;
+            b.whitepieces = temp_whitepieces;
+
+            if(value <= alpha)
+            {
+                //flag=true;
+                break;
+            }
+            beta = min(value, beta);
+        }
+        return value;
+    }
+}
+
+
 int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int beta){
     
     int val=130;
@@ -1636,13 +1720,25 @@ int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int be
             }
         }
         countmoves++;
-        return getBoardValue(b, plr);
+        //return getBoardValue(b, plr);
+        //calling the function for searching capture moves
+        return searchCaptures(b, plr, alpha, beta);
     }
     
     vector<vector<int>> moves;
     
     moves = b.genMovesForEachPiece(plr);
     
+    if(moves.size() == 0){
+        if(b.IsCheck(plr) > 0){
+            if(plr == WHITE)
+                return -128;
+            else
+                return 128;
+        }
+        else
+            return 0;
+    }
     
     vector<int> temp_board = b.board;
     int w_king = b.wking_pos;
@@ -1653,7 +1749,8 @@ int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int be
     vector<int> temp_blackpieces = b.blackpieces;
     
     if(plr == WHITE){
-        int value = -99999;
+        //int value = -99999;
+        int value = -127;
         for(int i = 0; i < moves.size(); i++){
             b.ChangeBoard(moves[i][0], moves[i][1]);
 
@@ -1715,7 +1812,8 @@ int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int be
     }
 
     else{
-        int value = 99999;
+        //int value = 99999;
+        int value = 127;
         for(int i = 0; i < moves.size(); i++){
             b.ChangeBoard(moves[i][0], moves[i][1]);
 
