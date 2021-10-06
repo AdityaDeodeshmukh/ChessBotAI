@@ -139,7 +139,7 @@ class ChessBoard{
 
         int ChangeBoard(int start,int end);
         
-        void Promote(int sqr,int p,int friendly);
+        void Promote(int sqr,int friendly,int p = -1);
         uint64_t Gen_Zobrist_Key(int plr);
         void makeLegal(int &friendly, int &checks, int &kingpos);
         node* create_node(int evaluation,int alpha,int beta,uint64_t hash,int depth,int move_num);
