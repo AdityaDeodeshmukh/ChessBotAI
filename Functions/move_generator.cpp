@@ -148,6 +148,8 @@ class ChessBoard{
         void CountNodes();
         int TestHash();
 
+        vector<vector<int>> getCaptureMoves(int plr);
+
         
 };
 void ChessBoard::Promote(int sqr, int p, int friendly)
@@ -1493,12 +1495,17 @@ long long evaluate(int depth, ChessBoard &base_board, int &plr){
     }
 }
 
-vector<vector<int>> getCaptureMoves(vector<vector<int>> &movelist, int plr){
+vector<vector<int>> ChessBoard::getCaptureMoves(int plr){
     vector<vector<int>> capturemovelist;
-    for(auto move_it = movelist.begin(); move_it != movelist.end(); move_it++){
-        auto move = move_it->begin();
-        if(*(move + 1) != 0 && *(move + 1) != plr * EN_PASSANT_SQ)
+    for(auto move_it = legalMoves.begin(); move_it != legalMoves.end(); move_it++){
+        auto move_start = move_it->begin();
+        auto move_end = move_start + 1;
+        if(board[*move_end] != 0 && (board[*move_start] != plr * PAWN && board[*move_end] != -plr * EN_PASSANT_SQ)){
             capturemovelist.push_back(*move_it);
+        }
+        else if(board[*move_start] == plr * PAWN && board[*move_end] != 0){
+            capturemovelist.push_back(*move_it);
+        }
     }
 
     return capturemovelist;
