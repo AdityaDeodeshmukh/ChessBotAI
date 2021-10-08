@@ -1549,11 +1549,19 @@ int minimax(ChessBoard &b, int &plr, int depth){
     int half_move = b.half_move;
 
     int bestvalue = -99999;
-
+    int promoteval = 0;
     for(int i = 0; i < moves.size(); i++){
         
-        b.ChangeBoard(moves[i][0], moves[i][1]);
-        
+        int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+        if(ispromote != 0 && promoteval < 4){
+            b.Promote(moves[i][1], promoteval, plr);
+            promoteval++;
+            if(promoteval <= 3)
+                i--;
+        }
+        if(promoteval == 4)
+            promoteval = 0;
 
         plr = -plr;
 
@@ -1570,6 +1578,7 @@ int minimax(ChessBoard &b, int &plr, int depth){
         b.bking_pos = b_king;
         b.En_pessant_pos = en_pessant;
         b.half_move = half_move;
+
         
     }
 
@@ -1600,10 +1609,20 @@ int searchCaptures(ChessBoard &b, int plr, int alpha, int beta){
     
     vector<vector<int>> capturemoves = b.getCaptureMoves(plr);
 
+    int promoteval = 0;
     if(plr == WHITE){
         value = -127;
         for(int i = 0; i < capturemoves.size(); i++){
-            b.ChangeBoard(moves[i][0], moves[i][1]);
+            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            if(ispromote != 0 && promoteval < 4){
+                b.Promote(moves[i][1], promoteval, plr);
+                promoteval++;
+                if(promoteval <= 3)
+                    i--;
+            }
+            if(promoteval == 4)
+                promoteval = 0;
 
             plr = -plr;
 
@@ -1630,7 +1649,16 @@ int searchCaptures(ChessBoard &b, int plr, int alpha, int beta){
         value = 127;
         for(int i = 0; i < moves.size(); i++){
             
-            b.ChangeBoard(moves[i][0], moves[i][1]);
+            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            if(ispromote != 0 && promoteval < 4){
+                b.Promote(moves[i][1], promoteval, plr);
+                promoteval++;
+                if(promoteval <= 3)
+                    i--;
+            }
+            if(promoteval == 4)
+                promoteval = 0;
             
             plr = -plr;
 
@@ -1738,11 +1766,21 @@ int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int be
     int en_pessant = b.En_pessant_pos;
     int half_move = b.half_move;
     
+    int promoteval = 0;
     if(plr == WHITE){
         //int value = -99999;
         int value = -127;
         for(int i = 0; i < moves.size(); i++){
-            b.ChangeBoard(moves[i][0], moves[i][1]);
+            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            if(ispromote != 0 && promoteval < 4){
+                b.Promote(moves[i][1], promoteval, plr);
+                promoteval++;
+                if(promoteval <= 3)
+                    i--;
+            }
+            if(promoteval == 4)
+                promoteval = 0;
 
             plr = -plr;
 
@@ -1804,7 +1842,16 @@ int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int be
         //int value = 99999;
         int value = 127;
         for(int i = 0; i < moves.size(); i++){
-            b.ChangeBoard(moves[i][0], moves[i][1]);
+            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            if(ispromote != 0 && promoteval < 4){
+                b.Promote(moves[i][1], promoteval, plr);
+                promoteval++;
+                if(promoteval <= 3)
+                    i--;
+            }
+            if(promoteval == 4)
+                promoteval = 0;
 
             plr = -plr;
 
@@ -1898,12 +1945,21 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
     int en_pessant = b.En_pessant_pos;
     int half_move = b.half_move;
     
-
+    int promoteval = 0;
     if(plr == WHITE){
         int value = -127;
         for(int i = 0; i < moves.size(); i++){
             
-            b.ChangeBoard(moves[i][0], moves[i][1]);
+            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            if(ispromote != 0 && promoteval < 4){
+                b.Promote(moves[i][1], promoteval, plr);
+                promoteval++;
+                if(promoteval <= 3)
+                    i--;
+            }
+            if(promoteval == 4)
+                promoteval = 0;
             
             plr = -plr;
 
@@ -1955,7 +2011,16 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
         int value = 127;
         for(int i = 0; i < moves.size(); i++){
             
-            b.ChangeBoard(moves[i][0], moves[i][1]);
+            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            if(ispromote != 0 && promoteval < 4){
+                b.Promote(moves[i][1], promoteval, plr);
+                promoteval++;
+                if(promoteval <= 3)
+                    i--;
+            }
+            if(promoteval == 4)
+                promoteval = 0;
             
             plr = -plr;
 
@@ -2026,6 +2091,8 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
     best_move.push_back(65);
     best_move.push_back(65);
     vector<float> evals;
+    
+    int promoteval = 0;
     for(int i=0;i<mvscpy.size();i++)
     {
         vector<int> temp_board = b.board;
@@ -2038,7 +2105,16 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
         {
             
             
-            b.ChangeBoard(moves[i][0], moves[i][1]);
+            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            if(ispromote != 0 && promoteval < 4){
+                b.Promote(moves[i][1], promoteval, plr);
+                promoteval++;
+                if(promoteval <= 3)
+                    i--;
+            }
+            if(promoteval == 4)
+                promoteval = 0;
 
             plr = -plr;
 
@@ -2069,7 +2145,16 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
         {
         
             
-            b.ChangeBoard(moves[i][0], moves[i][1]);
+            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            if(ispromote != 0 && promoteval < 4){
+                b.Promote(moves[i][1], promoteval, plr);
+                promoteval++;
+                if(promoteval <= 3)
+                    i--;
+            }
+            if(promoteval == 4)
+                promoteval = 0;
 
             plr = -plr;
 
