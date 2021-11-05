@@ -307,7 +307,7 @@ def main():
     prom=0
     prom_sqr=(65,65)
     drag=False
-    FEN="rnb2k1r/pp1Pbppp/2p5/q7/2B5/8/PPPQNnPP/RNB1K2R w KQ - 3 9"
+    FEN="8/4P3/3K4/8/6k1/8/2p5/8 w - - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
     #creates the board object
     
