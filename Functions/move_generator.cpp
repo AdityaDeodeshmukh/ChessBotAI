@@ -1929,19 +1929,25 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
     int depth =5;
     int best_eval=-plr*9999;
     int value=0;
+    b.move_num++;
     vector<vector<int>> moves=b.genMovesForEachPiece(plr);
     vector<vector<int>> mvscpy=moves;
     if(plr==WHITE)
     {
-        value=-127;
+        value=-9999;
     }
     if(plr==BLACK)
     {
-        value=127;
+        value=9999;
     }
     vector<int>best_move;
     best_move.push_back(65);
     best_move.push_back(65);
+    if(moves.size()>0)
+    {
+        best_move[0]=moves[0][0];
+        best_move[1]=moves[0][1];
+    }
     vector<float> evals;
     for(int i=0;i<mvscpy.size();i++)
     {
@@ -1954,13 +1960,22 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
         vector<int> temp_blackpieces = b.blackpieces;
         if(plr == WHITE)
         {
-            
-            
-            b.ChangeBoard(moves[i][0], moves[i][1]);
+            if(b.ChangeBoard(moves[i][0], moves[i][1])==1)
+            {
+                if(moves[i].size()!=3)
+                {
+                    moves[i].push_back(0);
+                    moves[i+1].push_back(1);
+                    moves[i+2].push_back(2);
+                    moves[i+3].push_back(3);
+                }
+                
+            }
 
             plr = -plr;
 
             value = minimaxAlphaBetaZobrist(b, plr, depth - 1, alpha, beta);
+            cout<<value;
             if(value>best_eval)
             {
                 best_move[0]=moves[i][0];
