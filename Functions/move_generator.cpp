@@ -2078,6 +2078,7 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
     int best_eval=-plr*9999;
     int value=0;
     b.move_num++;
+    vector<int> move_eval;
     vector<vector<int>> moves=b.genMovesForEachPiece(plr);
     vector<vector<int>> mvscpy=moves;
     if(plr==WHITE)
@@ -2106,10 +2107,8 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
         int b_king = b.bking_pos;
         int en_pessant = b.En_pessant_pos;
         int half_move = b.half_move;
-        
         if(plr == WHITE)
         {
-<<<<<<< HEAD
             if(b.ChangeBoard(moves[i][0], moves[i][1])==1)
             {
                 if(moves[i].size()!=3)
@@ -2119,27 +2118,11 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
                     moves[i+2].push_back(2);
                     moves[i+3].push_back(3);
                 }
-                
+                b.Promote(moves[i][1],moves[i][2],plr);
             }
-=======
-            
-            
-            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
-
-            if(ispromote != 0 && promoteval < 4){
-                b.Promote(moves[i][1], promoteval, plr);
-                promoteval++;
-                if(promoteval <= 3)
-                    i--;
-            }
-            if(promoteval == 4)
-                promoteval = 0;
->>>>>>> 3bfa7a52b56214320b177542e9f4f17eed0a6e34
-
             plr = -plr;
-
             value = minimaxAlphaBetaZobrist(b, plr, depth - 1, alpha, beta);
-            cout<<value;
+            move_eval.push_back(value);
             if(value>best_eval)
             {
                 best_move[0]=moves[i][0];
@@ -2153,33 +2136,27 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
             b.bking_pos = b_king;
             b.En_pessant_pos = en_pessant;
             b.half_move = half_move;
-            
-
-            if(value >= beta)
-                break;
-                
-            
-            alpha = max(alpha, value);
-            
+            alpha = max(alpha, value);    
         } 
         else
         {
         
             
-            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
-
-            if(ispromote != 0 && promoteval < 4){
-                b.Promote(moves[i][1], promoteval, plr);
-                promoteval++;
-                if(promoteval <= 3)
-                    i--;
+            if(b.ChangeBoard(moves[i][0], moves[i][1])==1)
+            {
+                if(moves[i].size()!=3)
+                {
+                    moves[i].push_back(0);
+                    moves[i+1].push_back(1);
+                    moves[i+2].push_back(2);
+                    moves[i+3].push_back(3);
+                }
+                b.Promote(moves[i][1],moves[i][2],plr);
             }
-            if(promoteval == 4)
-                promoteval = 0;
-
             plr = -plr;
 
             value = minimaxAlphaBetaZobrist(b, plr, depth - 1, alpha, beta);
+            move_eval.push_back(value);
             if(value<best_eval)
             {
                 best_move[0]=moves[i][0];
@@ -2194,13 +2171,45 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
             b.bking_pos = b_king;
             b.En_pessant_pos = en_pessant;
             b.half_move = half_move;
-            
-
-            if(value <= alpha)
-                break;
-                
             beta = min(value, beta);
-            
+        }
+    }
+    int n=moves.size();
+    if(plr==WHITE)
+    {
+        for (int i = 0; i < n-1; i++)
+        {
+            for (int j = 0; j < n-i-1; j++)
+            {
+                if (move_eval[j] > move_eval[j+1])
+                {
+                        // swap arr[j+1] and arr[j]
+                        int temp = move_eval[j];
+                        move_eval[j] = move_eval[j+1];
+                        move_eval[j+1] = temp;
+                        vector<int> temp1 = moves[j];
+                        moves[j] = moves[j+1];
+                        moves[j+1] = temp1;
+                }
+            }
+        }
+    }
+    else{
+        for (int i = 0; i < n-1; i++)
+        {
+            for (int j = 0; j < n-i-1; j++)
+            {
+                if (move_eval[j] < move_eval[j+1])
+                {
+                        // swap arr[j+1] and arr[j]
+                        int temp = move_eval[j];
+                        move_eval[j] = move_eval[j+1];
+                        move_eval[j+1] = temp;
+                        vector<int> temp1 = moves[j];
+                        moves[j] = moves[j+1];
+                        moves[j+1] = temp1;
+                }
+            }
         }
     }
     return(best_move);
