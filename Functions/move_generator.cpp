@@ -2075,22 +2075,15 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
 {
     int alpha=-9999;
     int beta=9999;
-    int depth =5;
+    
     int best_eval=-plr*9999;
     int value=0;
     b.move_num++;
     vector<int> move_eval;
     vector<vector<int>> moves=b.genMovesForEachPiece(plr);
     vector<vector<int>> mvscpy=moves;
-    if(plr==WHITE)
-    {
-        value=-9999;
-    }
-    if(plr==BLACK)
-    {
-        value=9999;
-    }
     vector<int>best_move;
+    best_move.push_back(65);
     best_move.push_back(65);
     best_move.push_back(65);
     if(moves.size()>0)
@@ -2099,141 +2092,164 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
         best_move[1]=moves[0][1];
     }
     vector<float> evals;
-    
+    vector<int>best_move_final;
     int promoteval = 0;
-    for(int i=0;i<mvscpy.size();i++)
+    for(int k=0;k<5;k++)
     {
-        vector<int> temp_board = b.board;
-        int w_king = b.wking_pos;
-        int b_king = b.bking_pos;
-        int en_pessant = b.En_pessant_pos;
-        int half_move = b.half_move;
-        if(plr == WHITE)
+        best_move[0]=moves[0][0];
+        best_move[1]=moves[0][1];
+        move_eval.clear();
+        if(plr==WHITE)
         {
-<<<<<<< HEAD
-            if(b.ChangeBoard(moves[i][0], moves[i][1])==1)
+            value=-9999;
+        }
+        if(plr==BLACK)
+        {
+            value=9999;
+        }
+        int alpha=-9999;
+        int beta=9999;
+        best_eval=-plr*9999;
+        for(int i=0;i<mvscpy.size();i++)
+        {
+            vector<int> temp_board = b.board;
+            int w_king = b.wking_pos;
+            int b_king = b.bking_pos;
+            int en_pessant = b.En_pessant_pos;
+            int half_move = b.half_move;
+            if(plr == WHITE)
             {
-                if(moves[i].size()!=3)
+
+                if(b.ChangeBoard(moves[i][0], moves[i][1])!=0)
                 {
-                    moves[i].push_back(0);
-                    moves[i+1].push_back(1);
-                    moves[i+2].push_back(2);
-                    moves[i+3].push_back(3);
+                    if(moves[i].size()!=3)
+                    {
+                        moves[i].push_back(0);
+                        moves[i+1].push_back(1);
+                        moves[i+2].push_back(2);
+                        moves[i+3].push_back(3);
+                    }
+                    b.Promote(moves[i][1],moves[i][2],plr);
+
+
                 }
-                b.Promote(moves[i][1],moves[i][2],plr);
-=======
-            
-            
-            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+                plr = -plr;
+                value = minimaxAlphaBetaZobrist(b, plr, k+1, alpha, beta);
+                move_eval.push_back(value);
+                if(value>best_eval)
+                {
+                    best_move[0]=moves[i][0];
+                    best_move[1]=moves[i][1];
+                    if(moves[i].size()==3)
+                    {
+                        best_move[2]=moves[i][2];
+                    }
+                    best_eval=value;
+                }
+                plr = -plr;
 
-            if(ispromote != 0 && promoteval < 4){
-                b.Promote(moves[i][1], promoteval, plr);
-                promoteval++;
-                //if(promoteval <= 3)
-                //    i--;
->>>>>>> a01aa5cad4cdfecd4466ced4be100d7edc3415fa
-            }
-            plr = -plr;
-            value = minimaxAlphaBetaZobrist(b, plr, depth - 1, alpha, beta);
-            move_eval.push_back(value);
-            if(value>best_eval)
+                b.board = temp_board;
+                b.wking_pos = w_king;
+                b.bking_pos = b_king;
+                b.En_pessant_pos = en_pessant;
+                b.half_move = half_move;
+                alpha = max(alpha, value);    
+            } 
+            else
             {
-                best_move[0]=moves[i][0];
-                best_move[1]=moves[i][1];
-                best_eval=value;
-            }
-            plr = -plr;
+            
+                
 
-            b.board = temp_board;
-            b.wking_pos = w_king;
-            b.bking_pos = b_king;
-            b.En_pessant_pos = en_pessant;
-            b.half_move = half_move;
-            alpha = max(alpha, value);    
-        } 
-        else
-        {
+                if(b.ChangeBoard(moves[i][0], moves[i][1])!=0)
+                {
+                    if(moves[i].size()!=3)
+                    {
+                        moves[i].push_back(0);
+                        moves[i+1].push_back(1);
+                        moves[i+2].push_back(2);
+                        moves[i+3].push_back(3);
+                    }
+                    b.Promote(moves[i][1],moves[i][2],plr);
+
+
+                }
+                plr = -plr;
+
+                value = minimaxAlphaBetaZobrist(b, plr,  k, alpha, beta);
+                move_eval.push_back(value);
+                if(value==best_eval)
+                {
+                    if(moves[i].size()==3)
+                    {
+                        best_move[0]=moves[i][0];
+                        best_move[1]=moves[i][1];
+                        best_move[2]=moves[i][2];
+                        best_eval=value;
+                    }
+                }
+                if(value<best_eval)
+                {
+                    best_move[0]=moves[i][0];
+                    best_move[1]=moves[i][1];
+                    if(moves[i].size()==3)
+                    {
+                        best_move[2]=moves[i][2];
+                    }
+                    best_eval=value;
+                }
+
+                plr = -plr;
+
+                b.board = temp_board;
+                b.wking_pos = w_king;
+                b.bking_pos = b_king;
+                b.En_pessant_pos = en_pessant;
+                b.half_move = half_move;
+                beta = min(value, beta);
+            }
+        }
+        best_move_final=best_move;
+        int n=moves.size();
         
-            
-<<<<<<< HEAD
-            if(b.ChangeBoard(moves[i][0], moves[i][1])==1)
-            {
-                if(moves[i].size()!=3)
-                {
-                    moves[i].push_back(0);
-                    moves[i+1].push_back(1);
-                    moves[i+2].push_back(2);
-                    moves[i+3].push_back(3);
-                }
-                b.Promote(moves[i][1],moves[i][2],plr);
-=======
-            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
-
-            if(ispromote != 0 && promoteval < 4){
-                b.Promote(moves[i][1], promoteval, plr);
-                promoteval++;
-                //if(promoteval <= 3)
-                //    i--;
->>>>>>> a01aa5cad4cdfecd4466ced4be100d7edc3415fa
-            }
-            plr = -plr;
-
-            value = minimaxAlphaBetaZobrist(b, plr, depth - 1, alpha, beta);
-            move_eval.push_back(value);
-            if(value<best_eval)
-            {
-                best_move[0]=moves[i][0];
-                best_move[1]=moves[i][1];
-                best_eval=value;
-            }
-
-            plr = -plr;
-
-            b.board = temp_board;
-            b.wking_pos = w_king;
-            b.bking_pos = b_king;
-            b.En_pessant_pos = en_pessant;
-            b.half_move = half_move;
-            beta = min(value, beta);
-        }
-    }
-    int n=moves.size();
-    if(plr==WHITE)
-    {
-        for (int i = 0; i < n-1; i++)
+        if(plr==WHITE)
         {
-            for (int j = 0; j < n-i-1; j++)
+            for (int i = 0; i < n-1; i++)
             {
-                if (move_eval[j] > move_eval[j+1])
+                for (int j = 0; j < n-i-1; j++)
                 {
-                        // swap arr[j+1] and arr[j]
-                        int temp = move_eval[j];
-                        move_eval[j] = move_eval[j+1];
-                        move_eval[j+1] = temp;
-                        vector<int> temp1 = moves[j];
-                        moves[j] = moves[j+1];
-                        moves[j+1] = temp1;
+                    
+                    if (move_eval[j] < move_eval[j+1])
+                    {
+                            // swap arr[j+1] and arr[j]
+                            int temp = move_eval[j];
+                            move_eval[j] = move_eval[j+1];
+                            move_eval[j+1] = temp;
+                            vector<int> temp1 =moves[j];
+                            moves[j] = moves[j+1];
+                            moves[j+1] = temp1;
+                    }
                 }
             }
         }
-    }
-    else{
-        for (int i = 0; i < n-1; i++)
-        {
-            for (int j = 0; j < n-i-1; j++)
+        else{
+            for (int i = 0; i < n-1; i++)
             {
-                if (move_eval[j] < move_eval[j+1])
+                for (int j = 0; j < n-i-1; j++)
                 {
-                        // swap arr[j+1] and arr[j]
-                        int temp = move_eval[j];
-                        move_eval[j] = move_eval[j+1];
-                        move_eval[j+1] = temp;
-                        vector<int> temp1 = moves[j];
-                        moves[j] = moves[j+1];
-                        moves[j+1] = temp1;
+                    if (move_eval[j] > move_eval[j+1])
+                    {
+                            // swap arr[j+1] and arr[j]
+                            int temp = move_eval[j];
+                            move_eval[j] = move_eval[j+1];
+                            move_eval[j+1] = temp;
+                            vector<int> temp1 = moves[j];
+                            moves[j] = moves[j+1];
+                            moves[j+1] = temp1;
+                    }
                 }
             }
         }
+        
     }
-    return(best_move);
+    return(best_move_final);
 }
