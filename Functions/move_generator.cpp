@@ -1080,11 +1080,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         
                     //}
                     legalMoves.push_back(move);
-                    /*if(pawn == true && ((friendly == WHITE && pos >= 0 && pos <= 7) || (friendly == BLACK && pos >= 56 && pos <= 63))){
+                    if(pawn == true && ((friendly == WHITE && pos >= 0 && pos <= 7) || (friendly == BLACK && pos >= 56 && pos <= 63))){
                         legalMoves.push_back(move);
                         legalMoves.push_back(move);
                         legalMoves.push_back(move);
-                    }*/
+                    }
 
                     pos += offset;
                     move_limit--;
@@ -1116,11 +1116,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         move.push_back(start_pos - 7);
                         legalMoves.push_back(move);
 
-                        /*if(start_pos - 7 >= 0 && start_pos - 7 <= 7){
+                        if(start_pos - 7 >= 0 && start_pos - 7 <= 7){
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
-                        }*/
+                        }
 
                         move.pop_back();
                     }
@@ -1128,11 +1128,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         move.push_back(start_pos - 9);
                         legalMoves.push_back(move);
 
-                        /*if(start_pos - 9 >= 0 && start_pos - 9 <= 7){
+                        if(start_pos - 9 >= 0 && start_pos - 9 <= 7){
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
-                        }*/
+                        }
 
                         move.pop_back();
                     }
@@ -1144,11 +1144,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         move.push_back(start_pos + 9);
                         legalMoves.push_back(move);
 
-                        /*if(start_pos + 9 >= 56 && start_pos + 9 <= 63){
+                        if(start_pos + 9 >= 56 && start_pos + 9 <= 63){
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
-                        }*/
+                        }
 
                         move.pop_back();
                     }
@@ -1156,11 +1156,11 @@ void ChessBoard::genMoves(int &start_pos, int &friendly, int &checks){
                         move.push_back(start_pos + 7);
                         legalMoves.push_back(move);
 
-                        /*if(start_pos + 7 >= 56 && start_pos + 7 <= 63){
+                        if(start_pos + 7 >= 56 && start_pos + 7 <= 63){
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
                             legalMoves.push_back(move);
-                        }*/
+                        }
 
                         move.pop_back();
                     }
@@ -1537,6 +1537,7 @@ int getBoardValue(ChessBoard &b, int &plr){
 int minimax(ChessBoard &b, int &plr, int depth){
     if(depth == 0){
         countmoves++;
+        //cout<<getBoardValue(b, plr)<<endl;
         return getBoardValue(b, plr);
     }
     
@@ -1551,14 +1552,14 @@ int minimax(ChessBoard &b, int &plr, int depth){
     int bestvalue = -99999;
     int promoteval = 0;
     for(int i = 0; i < moves.size(); i++){
-        
+        //cout<<moves[i][0]<<", "<<moves[i][1]<<endl;
         int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
 
         if(ispromote != 0 && promoteval < 4){
             b.Promote(moves[i][1], promoteval, plr);
             promoteval++;
-            if(promoteval <= 3)
-                i--;
+            //if(promoteval <= 3)
+            //    i--;
         }
         if(promoteval == 4)
             promoteval = 0;
@@ -1618,8 +1619,8 @@ int searchCaptures(ChessBoard &b, int plr, int alpha, int beta){
             if(ispromote != 0 && promoteval < 4){
                 b.Promote(moves[i][1], promoteval, plr);
                 promoteval++;
-                if(promoteval <= 3)
-                    i--;
+                //if(promoteval <= 3)
+                //    i--;
             }
             if(promoteval == 4)
                 promoteval = 0;
@@ -1654,8 +1655,8 @@ int searchCaptures(ChessBoard &b, int plr, int alpha, int beta){
             if(ispromote != 0 && promoteval < 4){
                 b.Promote(moves[i][1], promoteval, plr);
                 promoteval++;
-                if(promoteval <= 3)
-                    i--;
+                //if(promoteval <= 3)
+                //    i--;
             }
             if(promoteval == 4)
                 promoteval = 0;
@@ -1776,8 +1777,8 @@ int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int be
             if(ispromote != 0 && promoteval < 4){
                 b.Promote(moves[i][1], promoteval, plr);
                 promoteval++;
-                if(promoteval <= 3)
-                    i--;
+                //if(promoteval <= 3)
+                //    i--;
             }
             if(promoteval == 4)
                 promoteval = 0;
@@ -1847,8 +1848,8 @@ int minimaxAlphaBetaZobrist(ChessBoard &b, int plr, int depth, int alpha, int be
             if(ispromote != 0 && promoteval < 4){
                 b.Promote(moves[i][1], promoteval, plr);
                 promoteval++;
-                if(promoteval <= 3)
-                    i--;
+                //if(promoteval <= 3)
+                //    i--;
             }
             if(promoteval == 4)
                 promoteval = 0;
@@ -1955,8 +1956,8 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
             if(ispromote != 0 && promoteval < 4){
                 b.Promote(moves[i][1], promoteval, plr);
                 promoteval++;
-                if(promoteval <= 3)
-                    i--;
+                //if(promoteval <= 3)
+                //    i--;
             }
             if(promoteval == 4)
                 promoteval = 0;
@@ -2016,8 +2017,8 @@ int minimaxAlphaBeta(ChessBoard &b, int plr, int depth, int alpha, int beta){
             if(ispromote != 0 && promoteval < 4){
                 b.Promote(moves[i][1], promoteval, plr);
                 promoteval++;
-                if(promoteval <= 3)
-                    i--;
+                //if(promoteval <= 3)
+                //    i--;
             }
             if(promoteval == 4)
                 promoteval = 0;
@@ -2109,6 +2110,7 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
         int half_move = b.half_move;
         if(plr == WHITE)
         {
+<<<<<<< HEAD
             if(b.ChangeBoard(moves[i][0], moves[i][1])==1)
             {
                 if(moves[i].size()!=3)
@@ -2119,6 +2121,17 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
                     moves[i+3].push_back(3);
                 }
                 b.Promote(moves[i][1],moves[i][2],plr);
+=======
+            
+            
+            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            if(ispromote != 0 && promoteval < 4){
+                b.Promote(moves[i][1], promoteval, plr);
+                promoteval++;
+                //if(promoteval <= 3)
+                //    i--;
+>>>>>>> a01aa5cad4cdfecd4466ced4be100d7edc3415fa
             }
             plr = -plr;
             value = minimaxAlphaBetaZobrist(b, plr, depth - 1, alpha, beta);
@@ -2142,6 +2155,7 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
         {
         
             
+<<<<<<< HEAD
             if(b.ChangeBoard(moves[i][0], moves[i][1])==1)
             {
                 if(moves[i].size()!=3)
@@ -2152,6 +2166,15 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
                     moves[i+3].push_back(3);
                 }
                 b.Promote(moves[i][1],moves[i][2],plr);
+=======
+            int ispromote = b.ChangeBoard(moves[i][0], moves[i][1]);
+
+            if(ispromote != 0 && promoteval < 4){
+                b.Promote(moves[i][1], promoteval, plr);
+                promoteval++;
+                //if(promoteval <= 3)
+                //    i--;
+>>>>>>> a01aa5cad4cdfecd4466ced4be100d7edc3415fa
             }
             plr = -plr;
 
