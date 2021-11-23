@@ -2205,6 +2205,16 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
                     }
                     best_eval=value;
                 }
+                if(value==best_eval)
+                {
+                    if(moves[i].size()==3 && best_move.size()==2)
+                    {
+                        best_move[0]=moves[i][0];
+                        best_move[1]=moves[i][1];
+                        best_move[2]=moves[i][2];
+                        best_eval=value;
+                    }
+                }
                 plr = -plr;
 
                 b.board = temp_board;
@@ -2238,7 +2248,7 @@ vector<int> EvaluateBoard(ChessBoard &b, int plr)
                 move_eval.push_back(value);
                 if(value==best_eval)
                 {
-                    if(moves[i].size()==3)
+                    if(moves[i].size()==3 && best_move.size()==2)
                     {
                         best_move[0]=moves[i][0];
                         best_move[1]=moves[i][1];
