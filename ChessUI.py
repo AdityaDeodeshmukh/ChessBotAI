@@ -296,7 +296,7 @@ def main():
     prom=0
     prom_sqr=(65,65)
     drag=False
-    FEN="r6k/6pp/8/6N1/2Q5/7P/5PP1/6K1 w - - 0 1"
+    FEN="7K/8/8/8/8/8/5r2/k5r1 w - - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
     #creates the board object
     
@@ -365,12 +365,13 @@ def main():
                                 if(prom==0):
                                     plr=-plr
                                     draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
-                                    moveset=extractlist(list(board.genMovesForEachPiece(player)))
+                                    moveset=extractlist(list(board.genMovesForEachPiece(-player)))
                                     if(len(moveset)==0):
                                         if(board.IsCheck(-player)==0):
                                             print("Stalemate")
                                         else:
                                             print("Checkmate")
+                                        break
                                     print(moveset)
                                     best_move=list(EvaluateBoard(board,-player))
                                     chess_board=list(board.board)
