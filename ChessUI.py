@@ -1,33 +1,22 @@
 
 import pygame
-
 import numpy as np
-
 import os
-
 from Functions.FEN_parser import fen_code_parser
-
 from Functions.CompileC import CompileClass
-
 import time
 from pygame.locals import *
-
 import cppyy
 from pygame import mixer
 CompileClass()
 from cppyy.gbl import ChessBoard
 from cppyy.gbl import minimaxAlphaBetaZobrist
 from cppyy.gbl import EvaluateBoard
-
-
 #end=time.time()
 #print(end-strt)
-
 pygame.init()
-
 mixer.init()
 pygame.font.init()
-
 WHITE=(255,255,255)
 BLACK=(0,0,0)
 PLAYER_FONT=pygame.font.SysFont('Inter',25)
@@ -307,7 +296,7 @@ def main():
     prom=0
     prom_sqr=(65,65)
     drag=False
-    FEN="8/5K2/8/8/8/1p6/2k5/8 w - - 0 1"
+    FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
     #creates the board object
     
@@ -387,7 +376,12 @@ def main():
                                     chess_board=np.reshape(chess_board,(8,8))
                                     
                                     moveset=extractlist(list(board.genMovesForEachPiece(player)))
-                                    
+                                    print(moveset)
+                                    if(len(moveset)==0):
+                                        if(board.isCheck()==0):
+                                            print("Stalemate")
+                                        else:
+                                            print("Checkmate")
                                     plr=-plr
                                     peice=0
                                     continue;
