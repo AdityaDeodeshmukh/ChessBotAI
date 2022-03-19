@@ -191,7 +191,7 @@ class ChessBoard{
 
         void checkCastle(int &start_pos, vector<int> &move, int &friendly);
 
-        int IsCheck(int &friendly);
+        int IsCheck(int friendly);
 
         int ChangeBoard(int start,int end);
         
@@ -442,7 +442,7 @@ int ChessBoard::ChangeBoard(int start, int end)
 }
 
 
-int ChessBoard::IsCheck(int &friendly)
+int ChessBoard::IsCheck(int friendly)
 {
     int kingpos;
     int check = 0;
