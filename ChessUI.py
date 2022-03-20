@@ -296,13 +296,13 @@ def main():
     prom=0
     prom_sqr=(65,65)
     drag=False
-    FEN="7K/8/8/8/8/8/5r2/k5r1 w - - 0 1"
+    FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     chess_board,plr,half_move,full_move=fen_code_parser(FEN)
     #creates the board object
     
     board=ChessBoard(chess_board.flatten(),half_move)
     board.getEdgeDistance()
-    player=-1
+    player=1
     plr=player
     moveset=extractlist(list(board.genMovesForEachPiece(plr)))
     run=True
@@ -417,6 +417,12 @@ def main():
                         best_move=list(EvaluateBoard(board,-player))
                         print(best_move)
                         moves=extractlist(list(board.genMovesForEachPiece(-player)))
+                        if(len(moveset)==0):
+                            if(board.IsCheck(-player)==0):
+                                print("Stalemate")
+                            else:
+                                print("Checkmate")
+                            break
                         print(moves)
                         print(best_move)
                         chess_board=list(board.board)
@@ -427,6 +433,12 @@ def main():
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         moveset=extractlist(list(board.genMovesForEachPiece(player)))
+                        if(len(moveset)==0):
+                            if(board.IsCheck(player)==0):
+                                print("Stalemate")
+                            else:
+                                print("Checkmate")
+                            break
                         plr=-plr
                         peice=0
                         prom=0;
@@ -440,6 +452,12 @@ def main():
                         chess_board=np.reshape(chess_board,(8,8))
                         plr=-plr
                         moves=extractlist(list(board.genMovesForEachPiece(-player)))
+                        if(len(moveset)==0):
+                            if(board.IsCheck(-player)==0):
+                                print("Stalemate")
+                            else:
+                                print("Checkmate")
+                            break
                         print(moves)
                         print(best_move)
                         draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
@@ -452,6 +470,12 @@ def main():
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         moveset=extractlist(list(board.genMovesForEachPiece(player)))
+                        if(len(moveset)==0):
+                            if(board.IsCheck(player)==0):
+                                print("Stalemate")
+                            else:
+                                print("Checkmate")
+                            break
                         plr=-plr
                         peice=0
                         prom=0;
@@ -465,6 +489,12 @@ def main():
                         
                         draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
                         moves=extractlist(list(board.genMovesForEachPiece(-player)))
+                        if(len(moveset)==0):
+                            if(board.IsCheck(-player)==0):
+                                print("Stalemate")
+                            else:
+                                print("Checkmate")
+                            break
                         print(moves)
                         best_move=list(EvaluateBoard(board,-player))
                         print(best_move)
@@ -476,6 +506,12 @@ def main():
                         chess_board=list(board.board)
                         chess_board=np.reshape(chess_board,(8,8))
                         moveset=extractlist(list(board.genMovesForEachPiece(player)))
+                        if(len(moveset)==0):
+                            if(board.IsCheck(player)==0):
+                                print("Stalemate")
+                            else:
+                                print("Checkmate")
+                            break
                         plr=-plr
                         peice=0
                         prom=0;
@@ -490,6 +526,12 @@ def main():
                         draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
                         best_move=list(EvaluateBoard(board,-player))
                         moves=extractlist(list(board.genMovesForEachPiece(-player)))
+                        if(len(moveset)==0):
+                            if(board.IsCheck(-player)==0):
+                                print("Stalemate")
+                            else:
+                                print("Checkmate")
+                            break
                         print(moves)
                         print(best_move)
                         chess_board=list(board.board)
@@ -501,6 +543,12 @@ def main():
                         chess_board=np.reshape(chess_board,(8,8))
                         draw_main(chess_board,locfinal,locinitial,0,player,prom,moveset)
                         moveset=extractlist(list(board.genMovesForEachPiece(player)))
+                        if(len(moveset)==0):
+                            if(board.IsCheck(player)==0):
+                                print("Stalemate")
+                            else:
+                                print("Checkmate")
+                            break
                         plr=-plr
                         peice=0
                         prom=0;
