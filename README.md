@@ -1,4 +1,4 @@
-# ChessBot
+# ChessBotAI
 A chess game with an AI bot which can play as the opponent.
 
 ## Installation
